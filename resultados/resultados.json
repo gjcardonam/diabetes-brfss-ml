@@ -1,0 +1,2094 @@
+{
+  "datos": {
+    "n_registros": 253680,
+    "n_variables": 21,
+    "prevalencia": 0.13933301797540207,
+    "n_positivos": 35346,
+    "faltantes": 0,
+    "duplicados": 24206,
+    "tipos": {
+      "Binaria": 14,
+      "Ordinal": 4,
+      "Numérica": 3
+    }
+  },
+  "diccionario": [
+    {
+      "variable": "HighBP",
+      "nombre": "Hipertensión",
+      "significado": "Le han dicho que tiene presión arterial alta",
+      "tipo": "Binaria",
+      "codificacion": "0 = no, 1 = sí",
+      "minimo": 0,
+      "maximo": 1,
+      "valores_distintos": 2
+    },
+    {
+      "variable": "HighChol",
+      "nombre": "Colesterol alto",
+      "significado": "Le han dicho que tiene colesterol alto",
+      "tipo": "Binaria",
+      "codificacion": "0 = no, 1 = sí",
+      "minimo": 0,
+      "maximo": 1,
+      "valores_distintos": 2
+    },
+    {
+      "variable": "CholCheck",
+      "nombre": "Control de colesterol",
+      "significado": "Midió su colesterol en los últimos 5 años",
+      "tipo": "Binaria",
+      "codificacion": "0 = no, 1 = sí",
+      "minimo": 0,
+      "maximo": 1,
+      "valores_distintos": 2
+    },
+    {
+      "variable": "BMI",
+      "nombre": "IMC",
+      "significado": "Índice de masa corporal (kg/m²)",
+      "tipo": "Numérica",
+      "codificacion": "Entero",
+      "minimo": 12,
+      "maximo": 98,
+      "valores_distintos": 84
+    },
+    {
+      "variable": "Smoker",
+      "nombre": "Fumador",
+      "significado": "Ha fumado al menos 100 cigarrillos en su vida",
+      "tipo": "Binaria",
+      "codificacion": "0 = no, 1 = sí",
+      "minimo": 0,
+      "maximo": 1,
+      "valores_distintos": 2
+    },
+    {
+      "variable": "Stroke",
+      "nombre": "ACV",
+      "significado": "Ha tenido un accidente cerebrovascular",
+      "tipo": "Binaria",
+      "codificacion": "0 = no, 1 = sí",
+      "minimo": 0,
+      "maximo": 1,
+      "valores_distintos": 2
+    },
+    {
+      "variable": "HeartDiseaseorAttack",
+      "nombre": "Enfermedad coronaria",
+      "significado": "Enfermedad coronaria o infarto",
+      "tipo": "Binaria",
+      "codificacion": "0 = no, 1 = sí",
+      "minimo": 0,
+      "maximo": 1,
+      "valores_distintos": 2
+    },
+    {
+      "variable": "PhysActivity",
+      "nombre": "Actividad física",
+      "significado": "Actividad física en los últimos 30 días (fuera del trabajo)",
+      "tipo": "Binaria",
+      "codificacion": "0 = no, 1 = sí",
+      "minimo": 0,
+      "maximo": 1,
+      "valores_distintos": 2
+    },
+    {
+      "variable": "Fruits",
+      "nombre": "Frutas",
+      "significado": "Come fruta al menos una vez al día",
+      "tipo": "Binaria",
+      "codificacion": "0 = no, 1 = sí",
+      "minimo": 0,
+      "maximo": 1,
+      "valores_distintos": 2
+    },
+    {
+      "variable": "Veggies",
+      "nombre": "Verduras",
+      "significado": "Come verduras al menos una vez al día",
+      "tipo": "Binaria",
+      "codificacion": "0 = no, 1 = sí",
+      "minimo": 0,
+      "maximo": 1,
+      "valores_distintos": 2
+    },
+    {
+      "variable": "HvyAlcoholConsump",
+      "nombre": "Alcohol en exceso",
+      "significado": "Hombres ≥ 14 tragos/semana, mujeres ≥ 7",
+      "tipo": "Binaria",
+      "codificacion": "0 = no, 1 = sí",
+      "minimo": 0,
+      "maximo": 1,
+      "valores_distintos": 2
+    },
+    {
+      "variable": "AnyHealthcare",
+      "nombre": "Cobertura de salud",
+      "significado": "Tiene algún tipo de cobertura de salud",
+      "tipo": "Binaria",
+      "codificacion": "0 = no, 1 = sí",
+      "minimo": 0,
+      "maximo": 1,
+      "valores_distintos": 2
+    },
+    {
+      "variable": "NoDocbcCost",
+      "nombre": "No consultó por costo",
+      "significado": "En el último año no fue al médico por el costo",
+      "tipo": "Binaria",
+      "codificacion": "0 = no, 1 = sí",
+      "minimo": 0,
+      "maximo": 1,
+      "valores_distintos": 2
+    },
+    {
+      "variable": "GenHlth",
+      "nombre": "Salud general",
+      "significado": "Autopercepción de la salud",
+      "tipo": "Ordinal",
+      "codificacion": "1 = excelente … 5 = mala",
+      "minimo": 1,
+      "maximo": 5,
+      "valores_distintos": 5
+    },
+    {
+      "variable": "MentHlth",
+      "nombre": "Días mala salud mental",
+      "significado": "Días de mala salud mental en los últimos 30",
+      "tipo": "Numérica",
+      "codificacion": "Entero",
+      "minimo": 0,
+      "maximo": 30,
+      "valores_distintos": 31
+    },
+    {
+      "variable": "PhysHlth",
+      "nombre": "Días mala salud física",
+      "significado": "Días de mala salud física en los últimos 30",
+      "tipo": "Numérica",
+      "codificacion": "Entero",
+      "minimo": 0,
+      "maximo": 30,
+      "valores_distintos": 31
+    },
+    {
+      "variable": "DiffWalk",
+      "nombre": "Dificultad para caminar",
+      "significado": "Dificultad seria para caminar o subir escaleras",
+      "tipo": "Binaria",
+      "codificacion": "0 = no, 1 = sí",
+      "minimo": 0,
+      "maximo": 1,
+      "valores_distintos": 2
+    },
+    {
+      "variable": "Sex",
+      "nombre": "Sexo",
+      "significado": "Sexo del encuestado",
+      "tipo": "Binaria",
+      "codificacion": "0 = mujer, 1 = hombre",
+      "minimo": 0,
+      "maximo": 1,
+      "valores_distintos": 2
+    },
+    {
+      "variable": "Age",
+      "nombre": "Edad",
+      "significado": "Grupo de edad de 5 años",
+      "tipo": "Ordinal",
+      "codificacion": "1 = 18–24 … 13 = ≥ 80",
+      "minimo": 1,
+      "maximo": 13,
+      "valores_distintos": 13
+    },
+    {
+      "variable": "Education",
+      "nombre": "Educación",
+      "significado": "Máximo nivel educativo alcanzado",
+      "tipo": "Ordinal",
+      "codificacion": "1 = ninguno … 6 = universitario",
+      "minimo": 1,
+      "maximo": 6,
+      "valores_distintos": 6
+    },
+    {
+      "variable": "Income",
+      "nombre": "Ingreso",
+      "significado": "Ingreso anual del hogar (USD)",
+      "tipo": "Ordinal",
+      "codificacion": "1 = < 10 mil … 8 = ≥ 75 mil",
+      "minimo": 1,
+      "maximo": 8,
+      "valores_distintos": 8
+    }
+  ],
+  "eda": {
+    "imc": {
+      "mediana": 27.0,
+      "q1": 24.0,
+      "q3": 31.0,
+      "min": 12.0,
+      "max": 98.0,
+      "limite_atipicos": 41.5,
+      "pct_atipicos": 0.03871018606117944,
+      "mediana_sin": 27.0,
+      "mediana_con": 31.0,
+      "pct_obesidad_sin": 0.30821585277602204,
+      "pct_obesidad_con": 0.5815933910484921
+    },
+    "prevalencia_edad": {
+      "1": 0.01368421052631579,
+      "2": 0.018425901553040275,
+      "3": 0.028229794120291293,
+      "4": 0.045286840772625334,
+      "5": 0.06504920467908647,
+      "6": 0.08789545385740956,
+      "7": 0.11735197993463556,
+      "8": 0.1382654385054489,
+      "9": 0.1724521718204789,
+      "10": 0.20370255327079578,
+      "11": 0.21845918497429143,
+      "12": 0.21295369211514392,
+      "13": 0.18481829176985545
+    },
+    "prevalencia_ingreso": {
+      "1": 0.2428906329630007,
+      "2": 0.2619027412373759,
+      "3": 0.22308365637113917,
+      "4": 0.20134094859697044,
+      "5": 0.17401383147239502,
+      "6": 0.1450781464217165,
+      "7": 0.12182142113422337,
+      "8": 0.0796039165790784
+    },
+    "prevalencia_educacion": {
+      "1": 0.27011494252873564,
+      "2": 0.29260450160771706,
+      "3": 0.24224519940915804,
+      "4": 0.17635059760956173,
+      "5": 0.14810470605063653,
+      "6": 0.0969019333799208
+    },
+    "prevalencia_salud_general": {
+      "1": 0.025166118457361095,
+      "2": 0.07162902429167976,
+      "3": 0.17789440287655658,
+      "4": 0.31010452961672474,
+      "5": 0.3789421405512789
+    },
+    "pares_mas_correlacionados": [
+      [
+        "Education",
+        "Income",
+        0.4519783973928656
+      ],
+      [
+        "GenHlth",
+        "PhysHlth",
+        0.45184657304174597
+      ],
+      [
+        "GenHlth",
+        "DiffWalk",
+        0.42279064313406345
+      ],
+      [
+        "DiffWalk",
+        "PhysHlth",
+        0.4150223929321536
+      ],
+      [
+        "GenHlth",
+        "Income",
+        -0.35425296102363524
+      ],
+      [
+        "HighBP",
+        "Age",
+        0.3445345740196993
+      ]
+    ],
+    "correlacion_objetivo": {
+      "GenHlth": 0.28769724599353597,
+      "HighBP": 0.26312878992336214,
+      "BMI": 0.22631421069982066,
+      "DiffWalk": 0.218344351921018,
+      "HighChol": 0.20027619187912016,
+      "Age": 0.1776842632934176,
+      "HeartDiseaseorAttack": 0.17728225780720294,
+      "Income": -0.1633046933576509,
+      "PhysHlth": 0.15675169713222606,
+      "Education": -0.12003773605832625,
+      "PhysActivity": -0.11813311489591136,
+      "Stroke": 0.10581606726811366,
+      "CholCheck": 0.06476081015893632,
+      "Smoker": 0.06078850564034084,
+      "HvyAlcoholConsump": -0.05705625612168237,
+      "Veggies": -0.056584137064162564,
+      "Fruits": -0.04077922810406532,
+      "MentHlth": 0.04004895281242356,
+      "NoDocbcCost": 0.031432763359259056,
+      "Sex": 0.031429998020680854,
+      "AnyHealthcare": 0.016255139545865795
+    },
+    "max_abs_correlacion_entre_predictoras": 0.4519783973928656
+  },
+  "particion": {
+    "n_prueba": 50736,
+    "n_entrenamiento": 20000,
+    "n_pool": 202944,
+    "prevalencia_prueba": 0.13932907600126143
+  },
+  "mallas": {
+    "Regresión logística": [
+      {
+        "C": "0.001",
+        "mean_test_auc_roc": 0.821600825,
+        "std_test_auc_roc": 0.004199248437667175,
+        "mean_train_auc_roc": 0.822356740625
+      },
+      {
+        "C": "0.01",
+        "mean_test_auc_roc": 0.8229238250000002,
+        "std_test_auc_roc": 0.003819935541504581,
+        "mean_train_auc_roc": 0.8238555312500001
+      },
+      {
+        "C": "0.1",
+        "mean_test_auc_roc": 0.8229201749999999,
+        "std_test_auc_roc": 0.00379114315592935,
+        "mean_train_auc_roc": 0.8238852312499999
+      },
+      {
+        "C": "1",
+        "mean_test_auc_roc": 0.8229130750000001,
+        "std_test_auc_roc": 0.0037872216635352,
+        "mean_train_auc_roc": 0.82388420625
+      },
+      {
+        "C": "10",
+        "mean_test_auc_roc": 0.822911775,
+        "std_test_auc_roc": 0.0037854623953025857,
+        "mean_train_auc_roc": 0.823884203125
+      }
+    ],
+    "KNN": [
+      {
+        "n_neighbors": "5",
+        "weights": "uniform",
+        "mean_test_auc_roc": 0.766077675,
+        "std_test_auc_roc": 0.005019611504265011,
+        "mean_train_auc_roc": 0.8850108109375
+      },
+      {
+        "n_neighbors": "5",
+        "weights": "distance",
+        "mean_test_auc_roc": 0.7647771000000001,
+        "std_test_auc_roc": 0.00586179416614482,
+        "mean_train_auc_roc": 0.999995290625
+      },
+      {
+        "n_neighbors": "25",
+        "weights": "uniform",
+        "mean_test_auc_roc": 0.802307875,
+        "std_test_auc_roc": 0.0068738027680280344,
+        "mean_train_auc_roc": 0.8328868734375
+      },
+      {
+        "n_neighbors": "25",
+        "weights": "distance",
+        "mean_test_auc_roc": 0.8001341249999999,
+        "std_test_auc_roc": 0.007120070030817806,
+        "mean_train_auc_roc": 0.999995290625
+      },
+      {
+        "n_neighbors": "51",
+        "weights": "uniform",
+        "mean_test_auc_roc": 0.809831,
+        "std_test_auc_roc": 0.005845228131240859,
+        "mean_train_auc_roc": 0.8249024312500002
+      },
+      {
+        "n_neighbors": "51",
+        "weights": "distance",
+        "mean_test_auc_roc": 0.8075754250000001,
+        "std_test_auc_roc": 0.00607335359716937,
+        "mean_train_auc_roc": 0.999995290625
+      },
+      {
+        "n_neighbors": "101",
+        "weights": "uniform",
+        "mean_test_auc_roc": 0.8109136250000001,
+        "std_test_auc_roc": 0.004823408111102518,
+        "mean_train_auc_roc": 0.8188567203125
+      },
+      {
+        "n_neighbors": "101",
+        "weights": "distance",
+        "mean_test_auc_roc": 0.8092178000000001,
+        "std_test_auc_roc": 0.005132911127956557,
+        "mean_train_auc_roc": 0.999995290625
+      },
+      {
+        "n_neighbors": "151",
+        "weights": "uniform",
+        "mean_test_auc_roc": 0.8116675750000001,
+        "std_test_auc_roc": 0.005145950516911338,
+        "mean_train_auc_roc": 0.8170772312500001
+      },
+      {
+        "n_neighbors": "151",
+        "weights": "distance",
+        "mean_test_auc_roc": 0.809914375,
+        "std_test_auc_roc": 0.005262488403787679,
+        "mean_train_auc_roc": 0.999995290625
+      },
+      {
+        "n_neighbors": "201",
+        "weights": "uniform",
+        "mean_test_auc_roc": 0.8113552250000001,
+        "std_test_auc_roc": 0.005207532119079991,
+        "mean_train_auc_roc": 0.8155375421874999
+      },
+      {
+        "n_neighbors": "201",
+        "weights": "distance",
+        "mean_test_auc_roc": 0.809646925,
+        "std_test_auc_roc": 0.0052474793922891545,
+        "mean_train_auc_roc": 0.999995290625
+      },
+      {
+        "n_neighbors": "301",
+        "weights": "uniform",
+        "mean_test_auc_roc": 0.8114875750000001,
+        "std_test_auc_roc": 0.005233698726522227,
+        "mean_train_auc_roc": 0.8141828671875
+      },
+      {
+        "n_neighbors": "301",
+        "weights": "distance",
+        "mean_test_auc_roc": 0.8097394250000001,
+        "std_test_auc_roc": 0.005221767363402963,
+        "mean_train_auc_roc": 0.999995290625
+      }
+    ],
+    "Random Forest": [
+      {
+        "max_depth": "None",
+        "min_samples_leaf": "1",
+        "mean_test_auc_roc": 0.8139254250000001,
+        "std_test_auc_roc": 0.0036980756723936623,
+        "mean_train_auc_roc": 0.999989721875
+      },
+      {
+        "max_depth": "None",
+        "min_samples_leaf": "10",
+        "mean_test_auc_roc": 0.8262253749999999,
+        "std_test_auc_roc": 0.002599373336739123,
+        "mean_train_auc_roc": 0.8808365468750001
+      },
+      {
+        "max_depth": "None",
+        "min_samples_leaf": "30",
+        "mean_test_auc_roc": 0.8246556249999999,
+        "std_test_auc_roc": 0.0031164302484974512,
+        "mean_train_auc_roc": 0.8458879406249998
+      },
+      {
+        "max_depth": "12",
+        "min_samples_leaf": "1",
+        "mean_test_auc_roc": 0.825129725,
+        "std_test_auc_roc": 0.0028259167333362315,
+        "mean_train_auc_roc": 0.9318737625000001
+      },
+      {
+        "max_depth": "12",
+        "min_samples_leaf": "10",
+        "mean_test_auc_roc": 0.825783875,
+        "std_test_auc_roc": 0.0028099395622948973,
+        "mean_train_auc_roc": 0.8720422187500001
+      },
+      {
+        "max_depth": "12",
+        "min_samples_leaf": "30",
+        "mean_test_auc_roc": 0.824366425,
+        "std_test_auc_roc": 0.0031425531365833303,
+        "mean_train_auc_roc": 0.8452419375
+      }
+    ],
+    "MLP": [
+      {
+        "alpha": "0.0001",
+        "hidden_layer_sizes": "(32,)",
+        "mean_test_auc_roc": 0.8250268249999999,
+        "std_test_auc_roc": 0.00330124943638773,
+        "mean_train_auc_roc": 0.83651
+      },
+      {
+        "alpha": "0.0001",
+        "hidden_layer_sizes": "(64, 32)",
+        "mean_test_auc_roc": 0.822746475,
+        "std_test_auc_roc": 0.003580985050757686,
+        "mean_train_auc_roc": 0.8405585
+      },
+      {
+        "alpha": "0.01",
+        "hidden_layer_sizes": "(32,)",
+        "mean_test_auc_roc": 0.825048675,
+        "std_test_auc_roc": 0.0033042086785265074,
+        "mean_train_auc_roc": 0.836819503125
+      },
+      {
+        "alpha": "0.01",
+        "hidden_layer_sizes": "(64, 32)",
+        "mean_test_auc_roc": 0.8236058750000002,
+        "std_test_auc_roc": 0.0036162181842706344,
+        "mean_train_auc_roc": 0.841776753125
+      },
+      {
+        "alpha": "1",
+        "hidden_layer_sizes": "(32,)",
+        "mean_test_auc_roc": 0.826170475,
+        "std_test_auc_roc": 0.003934390274712196,
+        "mean_train_auc_roc": 0.8314684999999999
+      },
+      {
+        "alpha": "1",
+        "hidden_layer_sizes": "(64, 32)",
+        "mean_test_auc_roc": 0.826130075,
+        "std_test_auc_roc": 0.0036036821365445578,
+        "mean_train_auc_roc": 0.83322233125
+      }
+    ],
+    "SVM": [
+      {
+        "C": "0.1",
+        "gamma": "scale",
+        "mean_test_auc_roc": 0.821657425,
+        "std_test_auc_roc": 0.004176406592843958,
+        "mean_train_auc_roc": 0.8325609937499999
+      },
+      {
+        "C": "0.1",
+        "gamma": "0.01",
+        "mean_test_auc_roc": 0.8242898750000001,
+        "std_test_auc_roc": 0.003979496212619102,
+        "mean_train_auc_roc": 0.826614984375
+      },
+      {
+        "C": "1",
+        "gamma": "scale",
+        "mean_test_auc_roc": 0.817415875,
+        "std_test_auc_roc": 0.0049232291137270585,
+        "mean_train_auc_roc": 0.86002174375
+      },
+      {
+        "C": "1",
+        "gamma": "0.01",
+        "mean_test_auc_roc": 0.8258344750000001,
+        "std_test_auc_roc": 0.004694237482941201,
+        "mean_train_auc_roc": 0.834198096875
+      },
+      {
+        "C": "10",
+        "gamma": "scale",
+        "mean_test_auc_roc": 0.7957247749999998,
+        "std_test_auc_roc": 0.004895431134869491,
+        "mean_train_auc_roc": 0.907454375
+      },
+      {
+        "C": "10",
+        "gamma": "0.01",
+        "mean_test_auc_roc": 0.823038575,
+        "std_test_auc_roc": 0.005320021656793316,
+        "mean_train_auc_roc": 0.8453764781249999
+      }
+    ]
+  },
+  "modelos": {
+    "Regresión logística": {
+      "familia": "Paramétrico",
+      "malla": {
+        "C": [
+          "0.001",
+          "0.01",
+          "0.1",
+          "1",
+          "10"
+        ]
+      },
+      "n_configuraciones": 5,
+      "mejores_parametros": {
+        "C": "0.01"
+      },
+      "entrenamiento": {
+        "auc_roc": [
+          0.8238555312500001,
+          0.0009811014805620533
+        ],
+        "auc_pr": [
+          0.7948673703116882,
+          0.001774682721109055
+        ],
+        "sensibilidad": [
+          0.77005,
+          0.001759971590679795
+        ],
+        "especificidad": [
+          0.7263,
+          0.0017510711007837287
+        ],
+        "precision": [
+          0.7377736871041543,
+          0.0013428381364187034
+        ],
+        "f1": [
+          0.7535654031760819,
+          0.001291517636358278
+        ],
+        "exactitud_balanceada": [
+          0.748175,
+          0.001284158284636283
+        ]
+      },
+      "validacion": {
+        "auc_roc": [
+          0.8229238250000002,
+          0.003819935541504581
+        ],
+        "auc_pr": [
+          0.7938298000016134,
+          0.007407130120173701
+        ],
+        "sensibilidad": [
+          0.7681,
+          0.0077162166895441585
+        ],
+        "especificidad": [
+          0.7257,
+          0.004501110973970759
+        ],
+        "precision": [
+          0.7368533917725172,
+          0.004091040253406631
+        ],
+        "f1": [
+          0.7521411383968835,
+          0.005320973525167772
+        ],
+        "exactitud_balanceada": [
+          0.7468999999999999,
+          0.004874935897014388
+        ]
+      },
+      "tiempo_busqueda_s": 4.986801862716675,
+      "prueba": {
+        "auc_roc": {
+          "valor": 0.818999773757476,
+          "ic95": [
+            0.8143474498153482,
+            0.8237514542700285
+          ]
+        },
+        "auc_pr": {
+          "valor": 0.3929707046052762,
+          "ic95": [
+            0.38254757560256875,
+            0.40392505654557465
+          ]
+        },
+        "sensibilidad": {
+          "valor": 0.7588060546046117,
+          "ic95": [
+            0.7483578006355157,
+            0.7684775228264211
+          ]
+        },
+        "especificidad": {
+          "valor": 0.7271394874848284,
+          "ic95": [
+            0.7232812107621764,
+            0.7314333485079481
+          ]
+        },
+        "precision": {
+          "valor": 0.3104346316337751,
+          "ic95": [
+            0.30285368402482926,
+            0.31727376027224113
+          ]
+        },
+        "f1": {
+          "valor": 0.4406111384918679,
+          "ic95": [
+            0.43218134500438293,
+            0.44830348731907993
+          ]
+        },
+        "exactitud_balanceada": {
+          "valor": 0.74297277104472,
+          "ic95": [
+            0.7372883644125098,
+            0.748145325622366
+          ]
+        }
+      }
+    },
+    "KNN": {
+      "familia": "No paramétrico",
+      "malla": {
+        "n_neighbors": [
+          "5",
+          "25",
+          "51",
+          "101",
+          "151",
+          "201",
+          "301"
+        ],
+        "weights": [
+          "uniform",
+          "distance"
+        ]
+      },
+      "n_configuraciones": 14,
+      "mejores_parametros": {
+        "n_neighbors": "151",
+        "weights": "uniform"
+      },
+      "entrenamiento": {
+        "auc_roc": [
+          0.8170772312500001,
+          0.0010071253627546774
+        ],
+        "auc_pr": [
+          0.7906264859888946,
+          0.0018999230143494882
+        ],
+        "sensibilidad": [
+          0.7842,
+          0.003388030401280355
+        ],
+        "especificidad": [
+          0.6982,
+          0.0014802871343087636
+        ],
+        "precision": [
+          0.7220990302343955,
+          0.0009253586924104694
+        ],
+        "f1": [
+          0.7518664044023751,
+          0.0018178508709623647
+        ],
+        "exactitud_balanceada": [
+          0.7411999999999999,
+          0.0014675660121439079
+        ]
+      },
+      "validacion": {
+        "auc_roc": [
+          0.8116675750000001,
+          0.005145950516911338
+        ],
+        "auc_pr": [
+          0.7818442117885732,
+          0.007485472823947995
+        ],
+        "sensibilidad": [
+          0.7798,
+          0.0070894287499064556
+        ],
+        "especificidad": [
+          0.6946,
+          0.005180733538795455
+        ],
+        "precision": [
+          0.7185776978505791,
+          0.004335925959073426
+        ],
+        "f1": [
+          0.7479292561577566,
+          0.0051135150285021285
+        ],
+        "exactitud_balanceada": [
+          0.7372000000000001,
+          0.0049709154086546165
+        ]
+      },
+      "tiempo_busqueda_s": 103.0148515701294,
+      "prueba": {
+        "auc_roc": {
+          "valor": 0.8076031852363492,
+          "ic95": [
+            0.8026936029578426,
+            0.8125703805996245
+          ]
+        },
+        "auc_pr": {
+          "valor": 0.3821444150935169,
+          "ic95": [
+            0.37137870254465694,
+            0.3933978748524106
+          ]
+        },
+        "sensibilidad": {
+          "valor": 0.7764888951761211,
+          "ic95": [
+            0.7665085140361004,
+            0.7859364306801869
+          ]
+        },
+        "especificidad": {
+          "valor": 0.6957427805894612,
+          "ic95": [
+            0.6914796168963979,
+            0.7000506074553808
+          ]
+        },
+        "precision": {
+          "valor": 0.29235685752330226,
+          "ic95": [
+            0.28536850547789255,
+            0.2987327481168557
+          ]
+        },
+        "f1": {
+          "valor": 0.4247794459062065,
+          "ic95": [
+            0.4166694646947884,
+            0.432013579810503
+          ]
+        },
+        "exactitud_balanceada": {
+          "valor": 0.7361158378827911,
+          "ic95": [
+            0.7306575321055294,
+            0.7412298914780261
+          ]
+        }
+      }
+    },
+    "Random Forest": {
+      "familia": "Ensamble de árboles",
+      "malla": {
+        "max_depth": [
+          "None",
+          "12"
+        ],
+        "min_samples_leaf": [
+          "1",
+          "10",
+          "30"
+        ]
+      },
+      "n_configuraciones": 6,
+      "mejores_parametros": {
+        "max_depth": "None",
+        "min_samples_leaf": "10"
+      },
+      "entrenamiento": {
+        "auc_roc": [
+          0.8808365468750001,
+          0.0003821728961271058
+        ],
+        "auc_pr": [
+          0.8821439940478382,
+          0.00027255618033731797
+        ],
+        "sensibilidad": [
+          0.8292499999999998,
+          0.0016317168872080538
+        ],
+        "especificidad": [
+          0.748975,
+          0.0021999999999999806
+        ],
+        "precision": [
+          0.767632669752669,
+          0.0012808682519162928
+        ],
+        "f1": [
+          0.7972502297847653,
+          0.000501668120649481
+        ],
+        "exactitud_balanceada": [
+          0.7891125000000001,
+          0.0005947688626685093
+        ]
+      },
+      "validacion": {
+        "auc_roc": [
+          0.8262253749999999,
+          0.002599373336739123
+        ],
+        "auc_pr": [
+          0.8018323258649765,
+          0.002872293716907191
+        ],
+        "sensibilidad": [
+          0.7913,
+          0.005653317610041023
+        ],
+        "especificidad": [
+          0.7081000000000001,
+          0.003184336665618135
+        ],
+        "precision": [
+          0.7305158985904667,
+          0.003121014077322837
+        ],
+        "f1": [
+          0.7596903097893354,
+          0.004098834919670707
+        ],
+        "exactitud_balanceada": [
+          0.7497,
+          0.0039096035604649065
+        ]
+      },
+      "tiempo_busqueda_s": 45.64943528175354,
+      "prueba": {
+        "auc_roc": {
+          "valor": 0.8207268519812699,
+          "ic95": [
+            0.8156620035094564,
+            0.8253207213392344
+          ]
+        },
+        "auc_pr": {
+          "valor": 0.41049211536216856,
+          "ic95": [
+            0.3999048887071932,
+            0.42245766371495713
+          ]
+        },
+        "sensibilidad": {
+          "valor": 0.7859668977224501,
+          "ic95": [
+            0.775857951828831,
+            0.7939156734652091
+          ]
+        },
+        "especificidad": {
+          "valor": 0.7079029931069228,
+          "ic95": [
+            0.7040742420807216,
+            0.71202213767503
+          ]
+        },
+        "precision": {
+          "valor": 0.3034241712631751,
+          "ic95": [
+            0.2964965499149383,
+            0.30961399803647865
+          ]
+        },
+        "f1": {
+          "valor": 0.43782505910165487,
+          "ic95": [
+            0.42933726778333364,
+            0.44482159704135177
+          ]
+        },
+        "exactitud_balanceada": {
+          "valor": 0.7469349454146865,
+          "ic95": [
+            0.7415387267968626,
+            0.7515114034526017
+          ]
+        }
+      }
+    },
+    "MLP": {
+      "familia": "Red neuronal artificial",
+      "malla": {
+        "hidden_layer_sizes": [
+          "(32,)",
+          "(64, 32)"
+        ],
+        "alpha": [
+          "0.0001",
+          "0.01",
+          "1"
+        ]
+      },
+      "n_configuraciones": 6,
+      "mejores_parametros": {
+        "alpha": "1",
+        "hidden_layer_sizes": "(32,)"
+      },
+      "entrenamiento": {
+        "auc_roc": [
+          0.8314684999999999,
+          0.003336692251427649
+        ],
+        "auc_pr": [
+          0.8067549338508373,
+          0.005859178842820207
+        ],
+        "sensibilidad": [
+          0.8060499999999999,
+          0.004971544025752935
+        ],
+        "especificidad": [
+          0.7026749999999999,
+          0.0023986975632621778
+        ],
+        "precision": [
+          0.7305297266788849,
+          0.0019100993392626483
+        ],
+        "f1": [
+          0.766428883939376,
+          0.002964750256991526
+        ],
+        "exactitud_balanceada": [
+          0.7543625,
+          0.002654418486222526
+        ]
+      },
+      "validacion": {
+        "auc_roc": [
+          0.826170475,
+          0.003934390274712196
+        ],
+        "auc_pr": [
+          0.7992952758539987,
+          0.005097495783350451
+        ],
+        "sensibilidad": [
+          0.7999,
+          0.007038465741907105
+        ],
+        "especificidad": [
+          0.6972,
+          0.006217716622683948
+        ],
+        "precision": [
+          0.7254057643516842,
+          0.005141216277318031
+        ],
+        "f1": [
+          0.7608262561189998,
+          0.005548577602451046
+        ],
+        "exactitud_balanceada": [
+          0.74855,
+          0.005655528268871094
+        ]
+      },
+      "tiempo_busqueda_s": 14.095722675323486,
+      "prueba": {
+        "auc_roc": {
+          "valor": 0.8241708458674964,
+          "ic95": [
+            0.8193788015144149,
+            0.8288295575958623
+          ]
+        },
+        "auc_pr": {
+          "valor": 0.4114625381159377,
+          "ic95": [
+            0.40083973022004143,
+            0.42328013728914515
+          ]
+        },
+        "sensibilidad": {
+          "valor": 0.7941717357476304,
+          "ic95": [
+            0.7840344241438835,
+            0.8029799892869751
+          ]
+        },
+        "especificidad": {
+          "valor": 0.7051549224815078,
+          "ic95": [
+            0.7012137427599823,
+            0.7096447101322919
+          ]
+        },
+        "precision": {
+          "valor": 0.30364000216344855,
+          "ic95": [
+            0.2965311457906818,
+            0.3102693079128001
+          ]
+        },
+        "f1": {
+          "valor": 0.4393145003521402,
+          "ic95": [
+            0.4309267749400822,
+            0.44690670583982417
+          ]
+        },
+        "exactitud_balanceada": {
+          "valor": 0.7496633291145691,
+          "ic95": [
+            0.744439441904037,
+            0.7545976155432362
+          ]
+        }
+      }
+    },
+    "SVM": {
+      "familia": "Máquina de vectores de soporte",
+      "malla": {
+        "C": [
+          "0.1",
+          "1",
+          "10"
+        ],
+        "gamma": [
+          "scale",
+          "0.01"
+        ]
+      },
+      "n_configuraciones": 6,
+      "mejores_parametros": {
+        "C": "1",
+        "gamma": "0.01"
+      },
+      "entrenamiento": {
+        "auc_roc": [
+          0.834198096875,
+          0.0009505067965706999
+        ],
+        "auc_pr": [
+          0.8088278296159027,
+          0.0021923850953990205
+        ],
+        "sensibilidad": [
+          0.827225,
+          0.0025129663746258114
+        ],
+        "especificidad": [
+          0.6844249999999998,
+          0.0024116902786220397
+        ],
+        "precision": [
+          0.7238608770667264,
+          0.0013697640687776226
+        ],
+        "f1": [
+          0.7720962784248125,
+          0.001311033454643526
+        ],
+        "exactitud_balanceada": [
+          0.755825,
+          0.001301081281088945
+        ]
+      },
+      "validacion": {
+        "auc_roc": [
+          0.8258344750000001,
+          0.004694237482941201
+        ],
+        "auc_pr": [
+          0.7978004763730213,
+          0.007686084689247111
+        ],
+        "sensibilidad": [
+          0.8225,
+          0.0044944410108488505
+        ],
+        "especificidad": [
+          0.677,
+          0.0061806148561449935
+        ],
+        "precision": [
+          0.718037661536109,
+          0.004646581165467333
+        ],
+        "f1": [
+          0.7667237879087225,
+          0.0043379005777214805
+        ],
+        "exactitud_balanceada": [
+          0.74975,
+          0.004847679857416331
+        ]
+      },
+      "tiempo_busqueda_s": 307.2092664241791,
+      "prueba": {
+        "auc_roc": {
+          "valor": 0.8219665386863166,
+          "ic95": [
+            0.8172520600298183,
+            0.8267145764327732
+          ]
+        },
+        "auc_pr": {
+          "valor": 0.3977232678752598,
+          "ic95": [
+            0.38680394759780806,
+            0.4095096485082545
+          ]
+        },
+        "sensibilidad": {
+          "valor": 0.8145423680860093,
+          "ic95": [
+            0.804692398170814,
+            0.8231144900293844
+          ]
+        },
+        "especificidad": {
+          "valor": 0.6816131174571186,
+          "ic95": [
+            0.6775048967052727,
+            0.6861332640731038
+          ]
+        },
+        "precision": {
+          "valor": 0.2928640455724531,
+          "ic95": [
+            0.28596663730718447,
+            0.2987806561066816
+          ]
+        },
+        "f1": {
+          "valor": 0.43082678638234195,
+          "ic95": [
+            0.4225410621767822,
+            0.43805650323322837
+          ]
+        },
+        "exactitud_balanceada": {
+          "valor": 0.7480777427715639,
+          "ic95": [
+            0.7429128239936093,
+            0.7531946345770874
+          ]
+        }
+      }
+    }
+  },
+  "linea_base_auc_pr": 0.13932907600126143,
+  "control_lr_completa": {
+    "auc_roc": 0.8196370120329295,
+    "n": 202944
+  },
+  "bloques": {
+    "Socioeconómico y acceso": {
+      "n_variables": 4,
+      "auc_lr": 0.6414930616157068,
+      "auc_rf": 0.639150712706065
+    },
+    "Demográfico": {
+      "n_variables": 2,
+      "auc_lr": 0.650823399262224,
+      "auc_rf": 0.658244148866421
+    },
+    "Estilo de vida": {
+      "n_variables": 5,
+      "auc_lr": 0.6183811504306489,
+      "auc_rf": 0.6191167617817511
+    },
+    "Clínico": {
+      "n_variables": 10,
+      "auc_lr": 0.8068511168206255,
+      "auc_rf": 0.807872410503154
+    },
+    "Social + demográfico": {
+      "n_variables": 6,
+      "auc_lr": 0.7002854163619371,
+      "auc_rf": 0.7053456397750768
+    },
+    "Todas": {
+      "n_variables": 21,
+      "auc_lr": 0.818999773757476,
+      "auc_rf": 0.8207268519812699
+    }
+  },
+  "ranking_validacion": [
+    "Random Forest",
+    "MLP",
+    "SVM",
+    "Regresión logística",
+    "KNN"
+  ],
+  "reduccion": {
+    "mejores_modelos": [
+      "Random Forest",
+      "MLP"
+    ],
+    "referencia_21": {
+      "Random Forest": {
+        "validacion_auc": [
+          0.8262199750000001,
+          0.0025894515652450643
+        ],
+        "prueba": {
+          "auc_roc": {
+            "valor": 0.8207180370850427,
+            "ic95": [
+              0.8156582009536094,
+              0.8252688544328778
+            ]
+          },
+          "auc_pr": {
+            "valor": 0.4105050860135541,
+            "ic95": [
+              0.40061275360305243,
+              0.4226708216273738
+            ]
+          },
+          "sensibilidad": {
+            "valor": 0.7859668977224501,
+            "ic95": [
+              0.7765267706990115,
+              0.7935976532205249
+            ]
+          },
+          "especificidad": {
+            "valor": 0.707925893695468,
+            "ic95": [
+              0.7041747630072891,
+              0.7121892994771397
+            ]
+          },
+          "precision": {
+            "valor": 0.3034407427635172,
+            "ic95": [
+              0.2975576893510033,
+              0.30923873848515326
+            ]
+          },
+          "f1": {
+            "valor": 0.43784231057173256,
+            "ic95": [
+              0.43118248498494893,
+              0.44447027819135865
+            ]
+          },
+          "exactitud_balanceada": {
+            "valor": 0.746946395708959,
+            "ic95": [
+              0.7418719862764566,
+              0.7515282975354614
+            ]
+          }
+        },
+        "tiempo_s": 41.7485830783844
+      },
+      "MLP": {
+        "validacion_auc": [
+          0.826170475,
+          0.003934390274712196
+        ],
+        "prueba": {
+          "auc_roc": {
+            "valor": 0.8241708458674964,
+            "ic95": [
+              0.8194203409974098,
+              0.8289151870719078
+            ]
+          },
+          "auc_pr": {
+            "valor": 0.4114625381159377,
+            "ic95": [
+              0.40132310111756936,
+              0.42311166145465906
+            ]
+          },
+          "sensibilidad": {
+            "valor": 0.7941717357476304,
+            "ic95": [
+              0.7841482119679994,
+              0.8027007122589896
+            ]
+          },
+          "especificidad": {
+            "valor": 0.7051549224815078,
+            "ic95": [
+              0.701444432730903,
+              0.7096447101322919
+            ]
+          },
+          "precision": {
+            "valor": 0.30364000216344855,
+            "ic95": [
+              0.2978664310333356,
+              0.3101529408503606
+            ]
+          },
+          "f1": {
+            "valor": 0.4393145003521402,
+            "ic95": [
+              0.43262459216490945,
+              0.4465508889112828
+            ]
+          },
+          "exactitud_balanceada": {
+            "valor": 0.7496633291145691,
+            "ic95": [
+              0.7449818071015577,
+              0.7546645941334648
+            ]
+          }
+        },
+        "tiempo_s": 30.29470157623291
+      }
+    },
+    "individual": {
+      "GenHlth": {
+        "spearman": 0.4088084711998071,
+        "informacion_mutua": 0.08990122465569104,
+        "auc_individual": 0.7279075799999999
+      },
+      "HighBP": {
+        "spearman": 0.3844989344833484,
+        "informacion_mutua": 0.07602184789846742,
+        "auc_individual": 0.6905
+      },
+      "BMI": {
+        "spearman": 0.32560912618945653,
+        "informacion_mutua": 0.058055838924708114,
+        "auc_individual": 0.6877226750000001
+      },
+      "Age": {
+        "spearman": 0.263408556364907,
+        "informacion_mutua": 0.04898665119660357,
+        "auc_individual": 0.6511536349999999
+      },
+      "HighChol": {
+        "spearman": 0.2989153759476237,
+        "informacion_mutua": 0.04537376903591961,
+        "auc_individual": 0.64925
+      },
+      "Income": {
+        "spearman": -0.2289987180972072,
+        "informacion_mutua": 0.02700389768731773,
+        "auc_individual": 0.629908805
+      },
+      "DiffWalk": {
+        "spearman": 0.2669145508606726,
+        "informacion_mutua": 0.03666097894117315,
+        "auc_individual": 0.6164499999999999
+      },
+      "PhysHlth": {
+        "spearman": 0.21857617470133564,
+        "informacion_mutua": 0.026145856215020524,
+        "auc_individual": 0.6143484650000001
+      },
+      "Education": {
+        "spearman": -0.17407930607145836,
+        "informacion_mutua": 0.015922621681309784,
+        "auc_individual": 0.59568233
+      },
+      "PhysActivity": {
+        "spearman": -0.1674518908129263,
+        "informacion_mutua": 0.01414048570589635,
+        "auc_individual": 0.5765
+      },
+      "HeartDiseaseorAttack": {
+        "spearman": 0.21014035317332563,
+        "informacion_mutua": 0.022975797414086604,
+        "auc_individual": 0.5745999999999999
+      },
+      "Smoker": {
+        "spearman": 0.08418950777290388,
+        "informacion_mutua": 0.00354817099075877,
+        "auc_individual": 0.5420499999999999
+      },
+      "Fruits": {
+        "spearman": -0.06888269757822328,
+        "informacion_mutua": 0.002374723007766699,
+        "auc_individual": 0.5335
+      },
+      "Stroke": {
+        "spearman": 0.13105739279084677,
+        "informacion_mutua": 0.00898456827573238,
+        "auc_individual": 0.53145
+      },
+      "Veggies": {
+        "spearman": -0.07266863227337528,
+        "informacion_mutua": 0.002647312157740528,
+        "auc_individual": 0.52975
+      },
+      "MentHlth": {
+        "spearman": 0.054662040873088,
+        "informacion_mutua": 0.006535685672953706,
+        "auc_individual": 0.526173775
+      },
+      "Sex": {
+        "spearman": 0.03953248265490067,
+        "informacion_mutua": 0.0007816177475458153,
+        "auc_individual": 0.5197
+      },
+      "HvyAlcoholConsump": {
+        "spearman": -0.08455811238828448,
+        "informacion_mutua": 0.0036742531342898108,
+        "auc_individual": 0.5170000000000001
+      },
+      "CholCheck": {
+        "spearman": 0.1062810462624041,
+        "informacion_mutua": 0.006189512673496218,
+        "auc_individual": 0.5161
+      },
+      "NoDocbcCost": {
+        "spearman": 0.0407533869248704,
+        "informacion_mutua": 0.0008323932273612278,
+        "auc_individual": 0.512
+      },
+      "AnyHealthcare": {
+        "spearman": 0.014440952256030145,
+        "informacion_mutua": 0.00010434378302405511,
+        "auc_individual": 0.503
+      }
+    },
+    "candidatas_eliminar": [
+      "Smoker",
+      "Fruits",
+      "Veggies",
+      "MentHlth",
+      "Sex",
+      "HvyAlcoholConsump",
+      "NoDocbcCost",
+      "AnyHealthcare"
+    ],
+    "seleccion": {
+      "Random Forest": {
+        "validacion_auc": [
+          0.8234539999999999,
+          0.0027572580616891744
+        ],
+        "prueba": {
+          "auc_roc": {
+            "valor": 0.8184140447984559,
+            "ic95": [
+              0.813508335165531,
+              0.8230967875382595
+            ]
+          },
+          "auc_pr": {
+            "valor": 0.4050949459538861,
+            "ic95": [
+              0.394891486737889,
+              0.41646935746309593
+            ]
+          },
+          "sensibilidad": {
+            "valor": 0.778186447870986,
+            "ic95": [
+              0.7692302811032012,
+              0.7868185760222981
+            ]
+          },
+          "especificidad": {
+            "valor": 0.7050404195387822,
+            "ic95": [
+              0.70146173832489,
+              0.7090651749639386
+            ]
+          },
+          "precision": {
+            "valor": 0.29927642674500843,
+            "ic95": [
+              0.2934324951370035,
+              0.3055074750503218
+            ]
+          },
+          "f1": {
+            "valor": 0.43229862475442044,
+            "ic95": [
+              0.42531677992656786,
+              0.4390843682966797
+            ]
+          },
+          "exactitud_balanceada": {
+            "valor": 0.7416134337048841,
+            "ic95": [
+              0.7363631400052414,
+              0.7464919252883998
+            ]
+          }
+        },
+        "tiempo_s": 37.89565563201904
+      },
+      "MLP": {
+        "validacion_auc": [
+          0.8251836499999999,
+          0.003467013469291715
+        ],
+        "prueba": {
+          "auc_roc": {
+            "valor": 0.8202141204705011,
+            "ic95": [
+              0.8155647288490117,
+              0.8251427413259044
+            ]
+          },
+          "auc_pr": {
+            "valor": 0.4040655280858191,
+            "ic95": [
+              0.3933239483164969,
+              0.41588378145063853
+            ]
+          },
+          "sensibilidad": {
+            "valor": 0.791342481256189,
+            "ic95": [
+              0.7816215998149583,
+              0.8001525513141223
+            ]
+          },
+          "especificidad": {
+            "valor": 0.7005290035953924,
+            "ic95": [
+              0.6966404538314921,
+              0.7048086836124532
+            ]
+          },
+          "precision": {
+            "valor": 0.2996090193347973,
+            "ic95": [
+              0.29344782052022655,
+              0.30554662966550017
+            ]
+          },
+          "f1": {
+            "valor": 0.43465423465423464,
+            "ic95": [
+              0.4273971718260225,
+              0.4409051917429407
+            ]
+          },
+          "exactitud_balanceada": {
+            "valor": 0.7459357424257906,
+            "ic95": [
+              0.7408657756083719,
+              0.7509333449095181
+            ]
+          }
+        },
+        "tiempo_s": 27.44715189933777
+      },
+      "n_variables": 13
+    },
+    "pca": {
+      "autovalores": [
+        3.6177433279307247,
+        1.7281600104465025,
+        1.3588137320515605,
+        1.2105415740253336,
+        1.1764892121340582,
+        1.0651273961309158,
+        1.033584438650462,
+        0.9585948854515276,
+        0.9306873096267431,
+        0.8660518198962723,
+        0.8192602757111913,
+        0.7852859481542552,
+        0.7371752100750927,
+        0.7241696464871928,
+        0.7151846712568242,
+        0.6975706400408274,
+        0.645307803434975,
+        0.5548534165990595,
+        0.5083064464211628,
+        0.47527852653224784,
+        0.39286376144568524
+      ],
+      "varianza_acumulada": [
+        0.1722648781316348,
+        0.25455409729572914,
+        0.3192562778369177,
+        0.376898232453424,
+        0.4329187271045408,
+        0.4836365432836413,
+        0.5328523889707142,
+        0.5784974820996311,
+        0.6228137094930246,
+        0.6640522103170855,
+        0.7030626537788668,
+        0.7404553530101453,
+        0.775557179263221,
+        0.8100397239301195,
+        0.8440944340264652,
+        0.8773104226697427,
+        0.9080378292433048,
+        0.9344580994303634,
+        0.9586619580541178,
+        0.9812931372258283,
+        1.0000000000000004
+      ],
+      "k_kaiser": 7,
+      "k_90": 17,
+      "varianza_kaiser": 0.5328523889707142,
+      "cargas_pc1": {
+        "GenHlth": 0.404,
+        "DiffWalk": 0.361,
+        "PhysHlth": 0.345,
+        "Income": -0.316,
+        "HighBP": 0.263,
+        "Education": -0.244
+      },
+      "kaiser": {
+        "Random Forest": {
+          "validacion_auc": [
+            0.8145275750000002,
+            0.0037699978403508147
+          ],
+          "prueba": {
+            "auc_roc": {
+              "valor": 0.8102187052208091,
+              "ic95": [
+                0.805490217913622,
+                0.8149516259706322
+              ]
+            },
+            "auc_pr": {
+              "valor": 0.38500844119250033,
+              "ic95": [
+                0.37493783416862336,
+                0.39624503181589665
+              ]
+            },
+            "sensibilidad": {
+              "valor": 0.7859668977224501,
+              "ic95": [
+                0.7756131602644879,
+                0.7952811040339703
+              ]
+            },
+            "especificidad": {
+              "valor": 0.6887122999061076,
+              "ic95": [
+                0.6849006382490785,
+                0.6929350858805475
+              ]
+            },
+            "precision": {
+              "valor": 0.29014569951433494,
+              "ic95": [
+                0.284570720102992,
+                0.29509493064778747
+              ]
+            },
+            "f1": {
+              "valor": 0.42383095583187125,
+              "ic95": [
+                0.41730395168774137,
+                0.4293783013281143
+              ]
+            },
+            "exactitud_balanceada": {
+              "valor": 0.7373395988142788,
+              "ic95": [
+                0.7320723137328664,
+                0.7423931866934171
+              ]
+            }
+          },
+          "tiempo_s": 56.09669637680054
+        },
+        "MLP": {
+          "validacion_auc": [
+            0.8178754249999999,
+            0.004756606909473385
+          ],
+          "prueba": {
+            "auc_roc": {
+              "valor": 0.8128044761453439,
+              "ic95": [
+                0.808138596554364,
+                0.8175500554082208
+              ]
+            },
+            "auc_pr": {
+              "valor": 0.39147091656152333,
+              "ic95": [
+                0.3815565865853823,
+                0.40230675279568107
+              ]
+            },
+            "sensibilidad": {
+              "valor": 0.7863912858961664,
+              "ic95": [
+                0.7769319757625767,
+                0.7956160880090197
+              ]
+            },
+            "especificidad": {
+              "valor": 0.6914603705315227,
+              "ic95": [
+                0.6874687462738218,
+                0.6959555418103964
+              ]
+            },
+            "precision": {
+              "valor": 0.2920870113493064,
+              "ic95": [
+                0.28632068520792836,
+                0.297707686546374
+              ]
+            },
+            "f1": {
+              "valor": 0.4259606911612582,
+              "ic95": [
+                0.41911958140294076,
+                0.43229753958217093
+              ]
+            },
+            "exactitud_balanceada": {
+              "valor": 0.7389258282138444,
+              "ic95": [
+                0.7340081539219075,
+                0.7441410471007645
+              ]
+            }
+          },
+          "tiempo_s": 27.126732349395752
+        }
+      },
+      "var90": {
+        "Random Forest": {
+          "validacion_auc": [
+            0.815749325,
+            0.003746730398460777
+          ],
+          "prueba": {
+            "auc_roc": {
+              "valor": 0.8100638014802695,
+              "ic95": [
+                0.805185316979338,
+                0.8149080141557674
+              ]
+            },
+            "auc_pr": {
+              "valor": 0.3854316220912548,
+              "ic95": [
+                0.3748943630153751,
+                0.397084811550203
+              ]
+            },
+            "sensibilidad": {
+              "valor": 0.7885132267647474,
+              "ic95": [
+                0.779284596372175,
+                0.7976773678249985
+              ]
+            },
+            "especificidad": {
+              "valor": 0.686971855176678,
+              "ic95": [
+                0.682782128025534,
+                0.6911774349031478
+              ]
+            },
+            "precision": {
+              "valor": 0.2896637738398379,
+              "ic95": [
+                0.28366255667469326,
+                0.2954495821834766
+              ]
+            },
+            "f1": {
+              "valor": 0.42368501064153236,
+              "ic95": [
+                0.4164105357761952,
+                0.4302526283117463
+              ]
+            },
+            "exactitud_balanceada": {
+              "valor": 0.7377425409707128,
+              "ic95": [
+                0.7327604665992709,
+                0.7426466184272359
+              ]
+            }
+          },
+          "tiempo_s": 81.72127079963684
+        },
+        "MLP": {
+          "validacion_auc": [
+            0.8215372750000001,
+            0.0038766340324113864
+          ],
+          "prueba": {
+            "auc_roc": {
+              "valor": 0.8191987325416743,
+              "ic95": [
+                0.8142156514655625,
+                0.8240907411738598
+              ]
+            },
+            "auc_pr": {
+              "valor": 0.4046838030531936,
+              "ic95": [
+                0.3945518294361055,
+                0.41584778398199723
+              ]
+            },
+            "sensibilidad": {
+              "valor": 0.793322959400198,
+              "ic95": [
+                0.783783605008694,
+                0.8028445623287042
+              ]
+            },
+            "especificidad": {
+              "valor": 0.6936817276203998,
+              "ic95": [
+                0.6897037266399659,
+                0.6981434447650612
+              ]
+            },
+            "precision": {
+              "valor": 0.29540665823851664,
+              "ic95": [
+                0.2894721891475367,
+                0.30132959373449597
+              ]
+            },
+            "f1": {
+              "valor": 0.4305070433347407,
+              "ic95": [
+                0.42329885142347773,
+                0.43741541396814443
+              ]
+            },
+            "exactitud_balanceada": {
+              "valor": 0.743502343510299,
+              "ic95": [
+                0.7384134196497164,
+                0.7488019288793311
+              ]
+            }
+          },
+          "tiempo_s": 29.678433418273926
+        }
+      }
+    },
+    "umap": {
+      "k_evaluados": [
+        2,
+        3,
+        5,
+        8,
+        10
+      ],
+      "auc_validacion_por_k": {
+        "2": 0.7575162500000001,
+        "3": 0.762130375,
+        "5": 0.7706767499999999,
+        "8": 0.774844125,
+        "10": 0.778167625
+      },
+      "k_elegido": 8,
+      "resultados": {
+        "Random Forest": {
+          "validacion_auc_k": 0.774844125,
+          "prueba": {
+            "auc_roc": {
+              "valor": 0.7718430318178912,
+              "ic95": [
+                0.7662873214050505,
+                0.7770959091433339
+              ]
+            },
+            "auc_pr": {
+              "valor": 0.31330548770394795,
+              "ic95": [
+                0.30424757341827735,
+                0.32275451730480637
+              ]
+            },
+            "sensibilidad": {
+              "valor": 0.7329183760079219,
+              "ic95": [
+                0.722073062718869,
+                0.7426915186868822
+              ]
+            },
+            "especificidad": {
+              "valor": 0.6827123457072847,
+              "ic95": [
+                0.6788170661462616,
+                0.6866488173894532
+              ]
+            },
+            "precision": {
+              "valor": 0.27216852279890735,
+              "ic95": [
+                0.2664123170299127,
+                0.27792900197608994
+              ]
+            },
+            "f1": {
+              "valor": 0.39693545297835664,
+              "ic95": [
+                0.39000118196292805,
+                0.4035422289844047
+              ]
+            },
+            "exactitud_balanceada": {
+              "valor": 0.7078153608576032,
+              "ic95": [
+                0.702101380624405,
+                0.7132538393505742
+              ]
+            }
+          }
+        },
+        "MLP": {
+          "validacion_auc_k": 0.774844125,
+          "prueba": {
+            "auc_roc": {
+              "valor": 0.7365429716002606,
+              "ic95": [
+                0.730551498075053,
+                0.742104046571875
+              ]
+            },
+            "auc_pr": {
+              "valor": 0.27223719806875013,
+              "ic95": [
+                0.2647130792883123,
+                0.2806847360981909
+              ]
+            },
+            "sensibilidad": {
+              "valor": 0.7084453246569529,
+              "ic95": [
+                0.6973319327731092,
+                0.7189616691709935
+              ]
+            },
+            "especificidad": {
+              "valor": 0.6600178624590652,
+              "ic95": [
+                0.6559432521840868,
+                0.6642131098615933
+              ]
+            },
+            "precision": {
+              "valor": 0.2522413619421779,
+              "ic95": [
+                0.24664022177006406,
+                0.2585023359227709
+              ]
+            },
+            "f1": {
+              "valor": 0.37202392006834306,
+              "ic95": [
+                0.36484132270436387,
+                0.38001909444242254
+              ]
+            },
+            "exactitud_balanceada": {
+              "valor": 0.684231593558009,
+              "ic95": [
+                0.6786181864938208,
+                0.6897650956853353
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

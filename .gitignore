@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+.ipynb_checkpoints/
+datos/
+informe/*.aux
+informe/*.log
+informe/*.out
+informe/*.bbl
+informe/*.blg
+informe/*.fls
+informe/*.fdb_latexmk
+informe/*.synctex.gz
+informe/main.pdf
