@@ -15,7 +15,10 @@
 # 5. Reducción de dimensión
 # 6. Discusión y conclusiones
 #
-# Ejecución completa: unos 20 minutos en un equipo de 4 núcleos. Las figuras quedan en
+# Además de los cinco modelos, compara tres formas de tratar el desbalance (submuestreo, pesos por
+# clase y SMOTE-NC) y la regresión logística con codificación *one-hot* de las variables ordinales.
+#
+# Ejecución completa: unos 35 minutos en un equipo de 4 núcleos. Las figuras quedan en
 # `informe/figuras/` y los números en `resultados/resultados.json`.
 
 # %%
@@ -30,20 +33,22 @@ import matplotlib.ticker as mticker
 import numpy as np
 import pandas as pd
 from scipy.stats import spearmanr
+from imblearn.over_sampling import SMOTENC
 from sklearn.base import clone
+from sklearn.compose import ColumnTransformer
 from sklearn.decomposition import PCA
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_selection import mutual_info_classif
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import (average_precision_score, balanced_accuracy_score, f1_score,
-                             make_scorer, precision_recall_curve, precision_score,
+                             make_scorer, matthews_corrcoef, precision_recall_curve, precision_score,
                              recall_score, roc_auc_score, roc_curve)
 from sklearn.model_selection import (GridSearchCV, StratifiedKFold, cross_validate,
                                      train_test_split)
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.svm import SVC
 
 warnings.filterwarnings("ignore")
@@ -173,7 +178,21 @@ print(resultados["datos"])
 # (13,9 % de positivos).
 
 # %% [markdown]
-# ## 2. Análisis exploratorio
+# ### Partición de prueba antes de explorar
+#
+# El 20 % de prueba (estratificado, con la prevalencia real) se separa **antes** del análisis
+# exploratorio. Así, las estadísticas, gráficas y correlaciones que orientan el modelado se calculan
+# solo con el 80 % restante (`X_pool`) y el conjunto de prueba no influye en ninguna decisión.
+# El conteo de registros, faltantes y duplicados de la sección anterior describe la base completa.
+
+# %%
+X_pool, X_test, y_pool, y_test = train_test_split(X, y, test_size=0.20, stratify=y,
+                                                  random_state=SEMILLA)
+df_pool = df.loc[X_pool.index]
+print(f"Exploración: {len(df_pool):,} registros; prueba reservada: {len(X_test):,}")
+
+# %% [markdown]
+# ## 2. Análisis exploratorio (solo con `X_pool`)
 
 # %%
 ROJO, AZUL, GRIS = "#c0392b", "#2c3e50", "#9db4c0"
@@ -181,10 +200,10 @@ eda = {}
 fig, ejes = plt.subplots(2, 3, figsize=(DOS_COL, 3.7))
 
 ax = ejes[0, 0]
-conteo = y.value_counts().sort_index()
+conteo = y_pool.value_counts().sort_index()
 ax.bar(["Sin diabetes", "Prediabetes\no diabetes"], conteo.values, color=[GRIS, ROJO])
 for i, v in enumerate(conteo.values):
-    ax.text(i, v, f"{v:,}".replace(",", ".") + f"\n({v / len(y) * 100:.1f} %)".replace(".", ","),
+    ax.text(i, v, f"{v:,}".replace(",", ".") + f"\n({v / len(y_pool) * 100:.1f} %)".replace(".", ","),
             ha="center", va="bottom", fontsize=6)
 ax.set_ylim(0, conteo.max() * 1.3)
 ax.set_ylabel("Registros (miles)")
@@ -192,12 +211,12 @@ ax.yaxis.set_major_formatter(mticker.FuncFormatter(lambda v, _: f"{v / 1000:.0f}
 ax.set_title("(a) Variable objetivo")
 
 ax = ejes[0, 1]
-imc = df.BMI
+imc = df_pool.BMI
 q1, q3 = imc.quantile([0.25, 0.75])
 limite_imc = q3 + 1.5 * (q3 - q1)
 bins = np.arange(12, 101, 2)
-ax.hist(imc[y == 0], bins=bins, density=True, alpha=0.6, color=GRIS, label="Sin diabetes")
-ax.hist(imc[y == 1], bins=bins, density=True, alpha=0.6, color=ROJO, label="Prediabetes/diabetes")
+ax.hist(imc[y_pool == 0], bins=bins, density=True, alpha=0.6, color=GRIS, label="Sin diabetes")
+ax.hist(imc[y_pool == 1], bins=bins, density=True, alpha=0.6, color=ROJO, label="Prediabetes/diabetes")
 ax.axvline(limite_imc, color="k", ls="--", lw=0.7)
 ax.text(limite_imc + 1.5, ax.get_ylim()[1] * 0.45, f"Atípicos:\nIMC > {limite_imc:.1f}".replace(".", ","),
         fontsize=5.5)
@@ -211,16 +230,16 @@ eda["imc"] = {
     "mediana": float(imc.median()), "q1": float(q1), "q3": float(q3), "min": float(imc.min()),
     "max": float(imc.max()), "limite_atipicos": float(limite_imc),
     "pct_atipicos": float((imc > limite_imc).mean()),
-    "mediana_sin": float(imc[y == 0].median()), "mediana_con": float(imc[y == 1].median()),
-    "pct_obesidad_sin": float((imc[y == 0] >= 30).mean()),
-    "pct_obesidad_con": float((imc[y == 1] >= 30).mean()),
+    "mediana_sin": float(imc[y_pool == 0].median()), "mediana_con": float(imc[y_pool == 1].median()),
+    "pct_obesidad_sin": float((imc[y_pool == 0] >= 30).mean()),
+    "pct_obesidad_con": float((imc[y_pool == 1] >= 30).mean()),
 }
 
 
 def prevalencia(ax, col, etiquetas, titulo, xlabel, color=ROJO):
-    p = df.groupby(col)[OBJETIVO].mean() * 100
+    p = df_pool.groupby(col)[OBJETIVO].mean() * 100
     ax.plot(p.index, p.values, "o-", color=color, ms=2.5, lw=1)
-    ax.axhline(y.mean() * 100, color="grey", ls=":", lw=0.7)
+    ax.axhline(y_pool.mean() * 100, color="grey", ls=":", lw=0.7)
     ax.set_xticks(list(etiquetas))
     ax.set_xticklabels(list(etiquetas.values()))
     ax.set_title(titulo)
@@ -254,7 +273,7 @@ plt.show()
 orden = ["GenHlth", "HighBP", "BMI", "DiffWalk", "HighChol", "Age", "HeartDiseaseorAttack",
          "PhysHlth", "Stroke", "CholCheck", "MentHlth", "HvyAlcoholConsump", "Smoker", "Sex",
          "NoDocbcCost", "AnyHealthcare", "Fruits", "Veggies", "PhysActivity", "Education", "Income"]
-rho = df[[OBJETIVO] + orden].corr(method="spearman")
+rho = df_pool[[OBJETIVO] + orden].corr(method="spearman")
 fig, ax = plt.subplots(figsize=(UNA_COL, 3.6))
 im = ax.imshow(rho.values, cmap="RdBu_r", vmin=-1, vmax=1)
 etiq = ["Diabetes"] + [NOMBRES[v] for v in orden]
@@ -278,6 +297,8 @@ pares = (rho.drop(index=OBJETIVO, columns=OBJETIVO).where(np.triu(np.ones((21, 2
 eda["pares_mas_correlacionados"] = [[a, b, float(r)] for (a, b), r in pares.head(6).items()]
 eda["correlacion_objetivo"] = rho[OBJETIVO].drop(OBJETIVO).sort_values(key=abs, ascending=False).to_dict()
 eda["max_abs_correlacion_entre_predictoras"] = float(pares.abs().max())
+eda["n_registros"] = int(len(df_pool))
+eda["prevalencia"] = float(y_pool.mean())
 resultados["eda"] = eda
 print(pares.head(6))
 print(rho[OBJETIVO].drop(OBJETIVO).sort_values(key=abs, ascending=False).head(8))
@@ -295,8 +316,8 @@ print(rho[OBJETIVO].drop(OBJETIVO).sort_values(key=abs, ascending=False).head(8)
 #
 # ### 4.1 Configuración experimental
 #
-# 1. **Partición de prueba.** 20 % estratificado (50.736 registros), con la prevalencia real. No se
-#    usa en ninguna decisión de modelado.
+# 1. **Partición de prueba.** 20 % estratificado (50.736 registros), con la prevalencia real, separado
+#    antes del análisis exploratorio. No se usa en ninguna decisión de modelado.
 # 2. **Submuestreo.** Del 80 % restante se toma una muestra balanceada de 20.000 registros (10.000
 #    por clase) mediante submuestreo aleatorio de la clase mayoritaria. Atiende el desbalance y el
 #    costo computacional de SVM y KNN.
@@ -304,12 +325,10 @@ print(rho[OBJETIVO].drop(OBJETIVO).sort_values(key=abs, ascending=False).head(8)
 #    muestra de entrenamiento, maximizando el AUC-ROC. La estandarización está dentro del *pipeline*,
 #    así que se ajusta en cada pliegue sin fuga de información.
 # 4. **Métricas.** AUC-ROC (criterio de selección), AUC-PR, sensibilidad, especificidad, precisión,
-#    F1 y exactitud balanceada. Se reportan en entrenamiento y validación (media ± desviación
+#    F1, exactitud balanceada y coeficiente de correlación de Matthews (MCC). Se reportan en entrenamiento y validación (media ± desviación
 #    estándar de los 5 pliegues) y en prueba (intervalo de confianza del 95 % por *bootstrap*).
 
 # %%
-X_pool, X_test, y_pool, y_test = train_test_split(X, y, test_size=0.20, stratify=y,
-                                                  random_state=SEMILLA)
 N_POR_CLASE = 10_000
 rng = np.random.default_rng(SEMILLA)
 idx_pos = rng.choice(np.where(y_pool == 1)[0], N_POR_CLASE, replace=False)
@@ -323,7 +342,7 @@ resultados["particion"] = {"n_prueba": int(len(X_test)), "n_entrenamiento": int(
 ESPECIFICIDAD = make_scorer(recall_score, pos_label=0)
 METRICAS = {"auc_roc": "roc_auc", "auc_pr": "average_precision", "sensibilidad": "recall",
             "especificidad": ESPECIFICIDAD, "precision": "precision", "f1": "f1",
-            "exactitud_balanceada": "balanced_accuracy"}
+            "exactitud_balanceada": "balanced_accuracy", "mcc": make_scorer(matthews_corrcoef)}
 
 
 def escalado(modelo):
@@ -345,7 +364,8 @@ def metricas_prueba(y_real, s, y_pred, n_boot=500):
         return {"auc_roc": roc_auc_score(yr, ss), "auc_pr": average_precision_score(yr, ss),
                 "sensibilidad": recall_score(yr, yp), "especificidad": recall_score(yr, yp, pos_label=0),
                 "precision": precision_score(yr, yp), "f1": f1_score(yr, yp),
-                "exactitud_balanceada": balanced_accuracy_score(yr, yp)}
+                "exactitud_balanceada": balanced_accuracy_score(yr, yp),
+                "mcc": matthews_corrcoef(yr, yp)}
 
     base = calc(y_real, s, y_pred)
     r = np.random.default_rng(SEMILLA)
@@ -446,6 +466,21 @@ def curva_hiper(ax, nombre, param_x, param_linea, etiqueta_x, log=False):
 resultados["mallas"] = {n: malla_como_tabla(n).to_dict(orient="records") for n in busquedas}
 
 
+def cv_completo(b):
+    """cv_results_ completo: todas las métricas de entrenamiento y validación de cada configuración."""
+    cvr = b.cv_results_
+    salida = {"params": [{k.replace("modelo__", ""): str(v) for k, v in d.items()} for d in cvr["params"]]}
+    for k, v in cvr.items():
+        if k.startswith(("mean_", "std_", "rank_", "split")):
+            salida[k] = np.asarray(v, dtype=float).tolist()
+    return salida
+
+
+resultados["cv_results"] = {n: cv_completo(b) for n, b in busquedas.items()}
+pd.concat([pd.DataFrame(cv_completo(b)).assign(modelo=n) for n, b in busquedas.items()]).to_csv(
+    RES / "cv_results.csv", index=False)
+
+
 fig, ejes = plt.subplots(1, 5, figsize=(DOS_COL, 1.95), sharey=False)
 curva_hiper(ejes[0], "Regresión logística", "C", None, "C (log)", log=True)
 curva_hiper(ejes[1], "KNN", "n_neighbors", "weights", "k vecinos")
@@ -500,21 +535,103 @@ fig.savefig(FIG / "fig_curvas.pdf")
 plt.show()
 
 # %% [markdown]
-# **Control del submuestreo.** Regresión logística entrenada con los 202.944 registros de
-# entrenamiento y pesos por clase, para verificar que entrenar con 20.000 no pierde información.
+# ### 4.5 Tratamiento del desbalance: submuestreo, pesos por clase y SMOTE-NC
+#
+# Se comparan tres estrategias con la regresión logística y el Random Forest, con los hiperparámetros
+# elegidos en la validación cruzada y el mismo conjunto de prueba:
+#
+# 1. **Submuestreo** (la del informe): 20.000 registros balanceados.
+# 2. **Todos los datos con pesos por clase**: los 202.944 registros de `X_pool`, sin submuestreo, con
+#    `class_weight="balanced"`.
+# 3. **SMOTE-NC**: sobremuestreo sintético de la clase minoritaria sobre `X_pool` hasta balancear.
+#    Se usa la variante para variables categóricas (las binarias y ordinales se tratan como
+#    categóricas, así que los registros sintéticos solo toman valores válidos). El sobremuestreo se
+#    aplica **solo a los datos de entrenamiento**, después de separar la prueba.
+#
+# El MLP no admite pesos por clase, por eso la comparación se hace con los otros dos mejores
+# modelos que sí los admiten.
 
 # %%
-C_lr = float(evaluacion["Regresión logística"]["mejores_parametros"]["C"])
-lr_completa = escalado(LogisticRegression(C=C_lr, class_weight="balanced", max_iter=2000))
-lr_completa.fit(X_pool, y_pool)
+CONTINUAS = ["BMI", "MentHlth", "PhysHlth"]
+t0 = time.time()
+smote = SMOTENC(categorical_features=[c not in CONTINUAS for c in VARIABLES], random_state=SEMILLA)
+X_smote, y_smote = smote.fit_resample(X_pool, y_pool)
+print(f"SMOTE-NC: {len(X_smote):,} registros ({int(y_smote.sum()):,} positivos, "
+      f"{int(y_smote.sum() - y_pool.sum()):,} sintéticos) en {time.time() - t0:.0f} s", flush=True)
+
+
+def configurado(nombre, **extra):
+    """Copia del mejor modelo de la validación cruzada, con parámetros adicionales opcionales."""
+    m = clone(busquedas[nombre].best_estimator_)
+    final = m.steps[-1][1] if isinstance(m, Pipeline) else m
+    final.set_params(**extra)
+    if isinstance(final, RandomForestClassifier):
+        final.set_params(n_jobs=N_JOBS)
+    return m
+
+
+ESTRATEGIAS = {
+    "Submuestreo": (None, None, {}),
+    "Todos los datos con pesos por clase": (X_pool, y_pool, {"class_weight": "balanced"}),
+    "SMOTE-NC": (X_smote, y_smote, {}),
+}
+desbalance = {}
+for estrategia, (Xe, ye, extra) in ESTRATEGIAS.items():
+    desbalance[estrategia] = {}
+    for nombre in ["Regresión logística", "Random Forest"]:
+        if Xe is None:
+            desbalance[estrategia][nombre] = {"n": int(len(X_train)), "prueba": evaluacion[nombre]["prueba"]}
+            continue
+        t0 = time.time()
+        m = configurado(nombre, **extra).fit(Xe, ye)
+        s = puntaje(m, X_test)
+        desbalance[estrategia][nombre] = {"n": int(len(Xe)),
+                                          "prueba": metricas_prueba(y_test, s, m.predict(X_test))}
+        del m
+        p = desbalance[estrategia][nombre]["prueba"]
+        print(f"{estrategia:<38} {nombre:<20} AUC {p['auc_roc']['valor']:.4f} {p['auc_roc']['ic95']}  "
+              f"sens {p['sensibilidad']['valor']:.3f}  ({time.time() - t0:.0f} s)", flush=True)
+resultados["desbalance"] = desbalance
+resultados["smote"] = {"n_original": int(len(X_pool)), "n_remuestreado": int(len(X_smote)),
+                       "n_sinteticos": int(y_smote.sum() - y_pool.sum())}
+# Se conserva la clave anterior: regresión logística con todos los datos y pesos por clase.
 resultados["control_lr_completa"] = {
-    "auc_roc": float(roc_auc_score(y_test, lr_completa.predict_proba(X_test)[:, 1])),
+    "auc_roc": desbalance["Todos los datos con pesos por clase"]["Regresión logística"]["prueba"]["auc_roc"]["valor"],
     "n": int(len(X_pool))}
-print(resultados["control_lr_completa"])
+del X_smote, y_smote
+
+# %% [markdown]
+# ### 4.6 Regresión logística con codificación *one-hot* de las variables ordinales
+#
+# La regresión logística trata cada variable ordinal (salud general, edad, educación e ingreso) como
+# un único efecto lineal. Con *one-hot*, cada nivel tiene su propio coeficiente y el efecto puede no
+# ser lineal. Se repite la misma búsqueda de $C$ con validación cruzada sobre la misma muestra.
+
+# %%
+ORDINALES = ["GenHlth", "Age", "Education", "Income"]
+prep_oh = ColumnTransformer([("onehot", OneHotEncoder(handle_unknown="ignore"), ORDINALES),
+                             ("escala", StandardScaler(), [c for c in VARIABLES if c not in ORDINALES])])
+b = GridSearchCV(Pipeline([("prep", prep_oh), ("modelo", LogisticRegression(max_iter=2000))]),
+                 {"modelo__C": [0.001, 0.01, 0.1, 1, 10]}, scoring=METRICAS, refit="auc_roc", cv=cv,
+                 n_jobs=N_JOBS, return_train_score=True).fit(X_train, y_train)
+i, cvr = b.best_index_, b.cv_results_
+resultados["lr_one_hot"] = {
+    "n_columnas": int(b.best_estimator_.named_steps["prep"].transform(X_train.iloc[:1]).shape[1]),
+    "mejores_parametros": {"C": str(b.best_params_["modelo__C"])},
+    "entrenamiento": {m: [float(cvr[f"mean_train_{m}"][i]), float(cvr[f"std_train_{m}"][i])] for m in METRICAS},
+    "validacion": {m: [float(cvr[f"mean_test_{m}"][i]), float(cvr[f"std_test_{m}"][i])] for m in METRICAS},
+    "prueba": metricas_prueba(y_test, puntaje(b.best_estimator_, X_test), b.best_estimator_.predict(X_test)),
+}
+r = resultados["lr_one_hot"]
+print(f"LR one-hot ({r['n_columnas']} columnas, C = {r['mejores_parametros']['C']}): "
+      f"AUC val {r['validacion']['auc_roc'][0]:.4f}, prueba {r['prueba']['auc_roc']['valor']:.4f} "
+      f"{r['prueba']['auc_roc']['ic95']}  (ordinal: {evaluacion['Regresión logística']['prueba']['auc_roc']['valor']:.4f})")
 
 # %% [markdown]
 # **Determinantes sociales frente a factores clínicos.** AUC-ROC en prueba de una regresión
-# logística y un Random Forest entrenados con cada bloque de variables.
+# logística y un Random Forest entrenados con cada bloque de variables. Todos los bloques usan la
+# **misma partición**: la misma muestra de entrenamiento de 20.000 registros y el mismo conjunto de
+# prueba, así que las diferencias se deben solo a las variables.
 
 # %%
 BLOQUES = {
@@ -524,6 +641,7 @@ BLOQUES = {
     "Clínico": ["HighBP", "HighChol", "CholCheck", "BMI", "Stroke", "HeartDiseaseorAttack",
                 "GenHlth", "MentHlth", "PhysHlth", "DiffWalk"],
 }
+C_lr = float(evaluacion["Regresión logística"]["mejores_parametros"]["C"])
 combinaciones = dict(BLOQUES)
 combinaciones["Social + demográfico"] = BLOQUES["Socioeconómico y acceso"] + BLOQUES["Demográfico"]
 combinaciones["Todas"] = VARIABLES
@@ -753,6 +871,10 @@ resultados["reduccion"] = reduccion
 # - **Determinantes sociales.** Las variables clínicas concentran la capacidad predictiva; las
 #   socioeconómicas y demográficas discriminan por sí solas (AUC ≈ 0,70) pero aportan poco una vez se
 #   conocen las clínicas.
+# - **Desbalance.** Entrenar con todos los datos y pesos por clase no mejora de forma significativa
+#   al submuestreo (los intervalos se traslapan); SMOTE-NC empeora el AUC de los dos modelos.
+# - **Codificación.** La regresión logística con *one-hot* de las ordinales queda dentro del intervalo
+#   de confianza de la versión ordinal.
 # - **Reducción de dimensión.** La selección de variables retira 8 de 21 casi sin pérdida; PCA con el
 #   criterio de Kaiser (7 componentes) pierde alrededor de una centésima; UMAP pierde mucho más
 #   porque sus vecindarios no coinciden con la separación entre clases.

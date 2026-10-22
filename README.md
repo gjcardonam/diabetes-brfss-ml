@@ -24,7 +24,8 @@ problema con selección de variables, PCA y UMAP.
 │   ├── fuente_notebook.py       # mismo código en texto plano (facilita revisar cambios)
 │   └── construir_notebook.py    # regenera el .ipynb a partir de fuente_notebook.py
 ├── resultados/
-│   └── resultados.json          # todos los números que usa el informe
+│   ├── resultados.json          # todos los números que usa el informe
+│   └── cv_results.csv           # resultados completos de la validación cruzada de cada malla
 └── informe/
     ├── informe.pdf              # reporte final
     ├── main.tex                 # fuente LaTeX (IEEEtran, compatible con Overleaf)
@@ -49,7 +50,7 @@ jupyter notebook notebooks/proyecto_diabetes.ipynb
 
 Ejecute todas las celdas en orden (*Run All*). La primera vez, el notebook descarga la base
 *CDC Diabetes Health Indicators* (UCI, id 891) con `ucimlrepo` y la guarda en `datos/`.
-La ejecución completa tarda unos 20 minutos en un equipo de 4 núcleos; la búsqueda de
+La ejecución completa tarda unos 25 minutos en un equipo de 4 núcleos; la búsqueda de
 hiperparámetros de la SVM y las proyecciones UMAP son las etapas más lentas.
 
 Al terminar, el notebook deja:

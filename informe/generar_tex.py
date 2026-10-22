@@ -57,20 +57,47 @@ macros.update({
     "eduDos": pct(E["prevalencia_educacion"]["2"]), "eduSeis": pct(E["prevalencia_educacion"]["6"]),
     "saludUno": pct(E["prevalencia_salud_general"]["1"]), "saludCinco": pct(E["prevalencia_salud_general"]["5"]),
     "maxCorrPred": num(E["max_abs_correlacion_entre_predictoras"], 2),
+    "nEda": miles(E["n_registros"]), "prevalenciaEda": pct(E["prevalencia"]),
 })
+for clave, var in [("Salud", "GenHlth"), ("Hiper", "HighBP"), ("Imc", "BMI"), ("Caminar", "DiffWalk"),
+                   ("Col", "HighChol")]:
+    macros[f"rho{clave}"] = num(E["correlacion_objetivo"][var], 2)
 M = R["modelos"]
 for clave, nombre in [("LR", "Regresión logística"), ("KNN", "KNN"), ("RF", "Random Forest"),
                       ("MLP", "MLP"), ("SVM", "SVM")]:
     m = M[nombre]
     for met, etq in [("auc_roc", "Auc"), ("auc_pr", "Ap"), ("sensibilidad", "Sens"),
                      ("especificidad", "Esp"), ("precision", "Prec"), ("f1", "Funo"),
-                     ("exactitud_balanceada", "Ba")]:
+                     ("exactitud_balanceada", "Ba"), ("mcc", "Mcc")]:
         macros[f"prueba{etq}{clave}"] = num(m["prueba"][met]["valor"])
         macros[f"val{etq}{clave}"] = num(m["validacion"][met][0])
         macros[f"de{etq}{clave}"] = num(m["validacion"][met][1])
         macros[f"ent{etq}{clave}"] = num(m["entrenamiento"][met][0])
+    macros[f"razonPR{clave}"] = num(m["prueba"]["auc_pr"]["valor"] / R["linea_base_auc_pr"], 2)
+razones = {n: M[n]["prueba"]["auc_pr"]["valor"] / R["linea_base_auc_pr"] for n in M}
+macros["razonPRMin"] = num(min(razones.values()), 2)
+macros["razonPRMax"] = num(max(razones.values()), 2)
 macros["controlAuc"] = num(R["control_lr_completa"]["auc_roc"])
 macros["controlN"] = miles(R["control_lr_completa"]["n"])
+DS = R["desbalance"]
+for ce, est in [("Sub", "Submuestreo"), ("Pesos", "Todos los datos con pesos por clase"), ("Smote", "SMOTE-NC")]:
+    for cm, mod in [("LR", "Regresión logística"), ("RF", "Random Forest")]:
+        pr = DS[est][mod]["prueba"]
+        for met, etq in [("auc_roc", "Auc"), ("auc_pr", "Ap"), ("sensibilidad", "Sens"),
+                         ("especificidad", "Esp"), ("exactitud_balanceada", "Ba")]:
+            macros[f"des{ce}{etq}{cm}"] = num(pr[met]["valor"])
+        macros[f"des{ce}IcAuc{cm}"] = f"{num(pr['auc_roc']['ic95'][0])}--{num(pr['auc_roc']['ic95'][1])}"
+macros["nSmote"] = miles(R["smote"]["n_remuestreado"])
+macros["nSinteticos"] = miles(R["smote"]["n_sinteticos"])
+OH = R["lr_one_hot"]
+macros.update({
+    "ohColumnas": str(OH["n_columnas"]), "ohC": OH["mejores_parametros"]["C"].replace(".", "{,}"),
+    "ohValAuc": num(OH["validacion"]["auc_roc"][0]), "ohDeAuc": num(OH["validacion"]["auc_roc"][1]),
+    "ohPruebaAuc": num(OH["prueba"]["auc_roc"]["valor"]),
+    "ohIcAuc": f"{num(OH['prueba']['auc_roc']['ic95'][0])}--{num(OH['prueba']['auc_roc']['ic95'][1])}",
+    "ohPruebaAp": num(OH["prueba"]["auc_pr"]["valor"]), "ohPruebaSens": num(OH["prueba"]["sensibilidad"]["valor"]),
+    "ohPruebaEsp": num(OH["prueba"]["especificidad"]["valor"]),
+})
 B = R["bloques"]
 for clave, nombre in [("Social", "Socioeconómico y acceso"), ("Demo", "Demográfico"),
                       ("Estilo", "Estilo de vida"), ("Clinico", "Clínico"),
@@ -128,7 +155,7 @@ for nombre, m in M.items():
 (SAL / "tabla_malla.tex").write_text("\n".join(filas) + "\n", encoding="utf-8")
 
 # ---------------------------------------------------------------- Tabla de resultados
-METS = ["auc_roc", "auc_pr", "sensibilidad", "especificidad", "f1", "exactitud_balanceada"]
+METS = ["auc_roc", "auc_pr", "sensibilidad", "especificidad", "f1", "exactitud_balanceada", "mcc"]
 filas = []
 for nombre, m in M.items():
     ent = " & ".join(pm(m["entrenamiento"][k]) for k in METS)
@@ -142,6 +169,22 @@ for nombre, m in M.items():
     filas.append(f" & \\scriptsize IC 95~\\% & {ics} \\\\ \\midrule")
 filas[-1] = filas[-1].replace(" \\midrule", "")
 (SAL / "tabla_resultados.tex").write_text("\n".join(filas) + "\n", encoding="utf-8")
+
+# ---------------------------------------------------------------- Tabla de desbalance
+filas = []
+for est, mods in DS.items():
+    primera = True
+    for nombre, r in mods.items():
+        p = r["prueba"]
+        cab = (f"\\multirow{{2}}{{*}}{{\\parbox{{3.1cm}}{{{est}}}}} & \\multirow{{2}}{{*}}{{{miles(r['n'])}}}"
+               if primera else " & ")
+        filas.append(f"{cab} & {nombre} & {ic(p['auc_roc'])} & {ic(p['auc_pr'])} & "
+                     f"{num(p['sensibilidad']['valor'])} & {num(p['especificidad']['valor'])} & "
+                     f"{num(p['exactitud_balanceada']['valor'])} & {num(p['mcc']['valor'])} \\\\")
+        primera = False
+    filas[-1] += " \\midrule"
+filas[-1] = filas[-1].replace(" \\midrule", "")
+(SAL / "tabla_desbalance.tex").write_text("\n".join(filas) + "\n", encoding="utf-8")
 
 # ---------------------------------------------------------------- Tabla de bloques
 filas = []
@@ -174,4 +217,4 @@ for etiqueta, res, k, tipo in repr_:
     filas[-1] += " \\midrule"
 filas[-1] = filas[-1].replace(" \\midrule", "")
 (SAL / "tabla_reduccion.tex").write_text("\n".join(filas) + "\n", encoding="utf-8")
-print(f"{len(macros)} valores y 5 tablas en {SAL}")
+print(f"{len(macros)} valores y 6 tablas en {SAL}")
