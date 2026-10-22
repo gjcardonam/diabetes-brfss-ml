@@ -601,6 +601,39 @@ resultados["control_lr_completa"] = {
 del X_smote, y_smote
 
 # %% [markdown]
+# **Estabilidad del submuestreo.** Los intervalos *bootstrap* solo miden la variabilidad del
+# conjunto de prueba, no la de cuáles 20.000 registros se sortearon. Se repite el submuestreo con
+# 10 semillas distintas y, con los mismos hiperparámetros, se reentrenan la regresión logística y el
+# Random Forest; se reporta la media y la desviación estándar de las métricas en el mismo conjunto
+# de prueba.
+
+# %%
+SEMILLAS_SUB = list(range(1, 11))
+semillas = {n: {"auc_roc": [], "auc_pr": [], "sensibilidad": [], "especificidad": []}
+            for n in ["Regresión logística", "Random Forest"]}
+t0 = time.time()
+for sem in SEMILLAS_SUB:
+    rng_s = np.random.default_rng(sem)
+    idx_s = np.concatenate([rng_s.choice(np.where(y_pool == 1)[0], N_POR_CLASE, replace=False),
+                            rng_s.choice(np.where(y_pool == 0)[0], N_POR_CLASE, replace=False)])
+    for nombre in semillas:
+        m = configurado(nombre).fit(X_pool.iloc[idx_s], y_pool.iloc[idx_s])
+        s = puntaje(m, X_test)
+        pred = m.predict(X_test)
+        semillas[nombre]["auc_roc"].append(roc_auc_score(y_test, s))
+        semillas[nombre]["auc_pr"].append(average_precision_score(y_test, s))
+        semillas[nombre]["sensibilidad"].append(recall_score(y_test, pred))
+        semillas[nombre]["especificidad"].append(recall_score(y_test, pred, pos_label=0))
+resultados["semillas"] = {"semillas": SEMILLAS_SUB, "modelos": {
+    n: {k: [float(np.mean(v)), float(np.std(v, ddof=1)), float(np.min(v)), float(np.max(v))]
+        for k, v in d.items()} for n, d in semillas.items()}}
+for n, d in resultados["semillas"]["modelos"].items():
+    print(f"{n:<20} AUC {d['auc_roc'][0]:.4f} ± {d['auc_roc'][1]:.4f} "
+          f"(rango {d['auc_roc'][2]:.4f}–{d['auc_roc'][3]:.4f})  "
+          f"AUC-PR {d['auc_pr'][0]:.4f} ± {d['auc_pr'][1]:.4f}")
+print(f"{len(SEMILLAS_SUB)} submuestreos en {time.time() - t0:.0f} s")
+
+# %% [markdown]
 # ### 4.6 Regresión logística con codificación *one-hot* de las variables ordinales
 #
 # La regresión logística trata cada variable ordinal (salud general, edad, educación e ingreso) como

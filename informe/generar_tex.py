@@ -77,6 +77,8 @@ for clave, nombre in [("LR", "Regresión logística"), ("KNN", "KNN"), ("RF", "R
 razones = {n: M[n]["prueba"]["auc_pr"]["valor"] / R["linea_base_auc_pr"] for n in M}
 macros["razonPRMin"] = num(min(razones.values()), 2)
 macros["razonPRMax"] = num(max(razones.values()), 2)
+macros["pruebaApCuatroMLP"] = num(M["MLP"]["prueba"]["auc_pr"]["valor"], 4)
+macros["lineaBaseCuatro"] = num(R["linea_base_auc_pr"], 4)
 macros["controlAuc"] = num(R["control_lr_completa"]["auc_roc"])
 macros["controlN"] = miles(R["control_lr_completa"]["n"])
 DS = R["desbalance"]
@@ -116,6 +118,28 @@ macros.update({
     "selRed": pct(1 - Rd["seleccion"]["n_variables"] / 21, 0),
     "mejorUno": Rd["mejores_modelos"][0], "mejorDos": Rd["mejores_modelos"][1],
 })
+# AUC de validación con cuatro decimales, para explicar el desempate entre los mejores modelos.
+for clave, nombre in [("LR", "Regresión logística"), ("KNN", "KNN"), ("RF", "Random Forest"),
+                      ("MLP", "MLP"), ("SVM", "SVM")]:
+    macros[f"valAucCuatro{clave}"] = num(M[nombre]["validacion"]["auc_roc"][0], 4)
+# Caída del AUC de prueba con UMAP frente a las 21 variables originales.
+for clave, nombre in [("RF", "Random Forest"), ("MLP", "MLP")]:
+    caida = (Rd["referencia_21"][nombre]["prueba"]["auc_roc"]["valor"]
+             - Rd["umap"]["resultados"][nombre]["prueba"]["auc_roc"]["valor"])
+    macros[f"umapCaida{clave}"] = num(caida)
+# Estabilidad del submuestreo: media, desviación y rango en varias semillas.
+SM = R["semillas"]
+macros["nSemillas"] = str(len(SM["semillas"]))
+for clave, nombre in [("LR", "Regresión logística"), ("RF", "Random Forest")]:
+    d = SM["modelos"][nombre]
+    macros[f"semAuc{clave}"] = num(d["auc_roc"][0], 4)
+    macros[f"semDeAuc{clave}"] = num(d["auc_roc"][1], 4)
+    macros[f"semMinAuc{clave}"] = num(d["auc_roc"][2], 4)
+    macros[f"semMaxAuc{clave}"] = num(d["auc_roc"][3], 4)
+    macros[f"semAp{clave}"] = num(d["auc_pr"][0], 4)
+    macros[f"semDeAp{clave}"] = num(d["auc_pr"][1], 4)
+    macros[f"semSens{clave}"] = num(d["sensibilidad"][0], 4)
+    macros[f"semDeSens{clave}"] = num(d["sensibilidad"][1], 4)
 
 with open(SAL / "valores.tex", "w", encoding="utf-8") as f:
     f.write("% Generado por generar_tex.py a partir de resultados/resultados.json. No editar a mano.\n")
