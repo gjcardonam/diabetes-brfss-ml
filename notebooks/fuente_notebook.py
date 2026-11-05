@@ -43,7 +43,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import (average_precision_score, balanced_accuracy_score, f1_score,
                              make_scorer, matthews_corrcoef, precision_recall_curve, precision_score,
                              recall_score, roc_auc_score, roc_curve)
-from sklearn.model_selection import (GridSearchCV, StratifiedKFold, cross_validate,
+from sklearn.model_selection import (GridSearchCV, StratifiedKFold, cross_val_predict, cross_validate,
                                      train_test_split)
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neural_network import MLPClassifier
@@ -53,7 +53,7 @@ from sklearn.svm import SVC
 
 warnings.filterwarnings("ignore")
 SEMILLA = 42
-N_JOBS = 4
+N_JOBS = 2
 RAIZ = Path.cwd().parent if Path.cwd().name == "notebooks" else Path.cwd()
 DATOS = RAIZ / "datos"
 FIG = RAIZ / "informe" / "figuras"
@@ -394,7 +394,7 @@ MODELOS = {
                       {"max_depth": [None, 12], "min_samples_leaf": [1, 10, 30]}),
     "MLP": ("Red neuronal artificial",
             escalado(MLPClassifier(max_iter=400, early_stopping=True, random_state=SEMILLA)),
-            {"modelo__hidden_layer_sizes": [(32,), (64, 32)],
+            {"modelo__hidden_layer_sizes": [(8,), (16,), (32,), (64, 32)],
              "modelo__alpha": [1e-4, 1e-2, 1]}),
     "SVM": ("Máquina de vectores de soporte", escalado(SVC(kernel="rbf", random_state=SEMILLA)),
             {"modelo__C": [0.1, 1, 10], "modelo__gamma": ["scale", 0.01]}),
@@ -533,6 +533,40 @@ for ax in ejes:
 fig.tight_layout()
 fig.savefig(FIG / "fig_curvas.pdf")
 plt.show()
+
+# %% [markdown]
+# ### 4.4.1 Umbral de decisión orientado al tamizaje
+#
+# Con el umbral por defecto (0,5 en la probabilidad) se pierde cerca de una de cada cinco personas
+# con diabetes. Para un tamizaje interesa más encontrar a los enfermos, así que se fija una meta de
+# **sensibilidad del 90 %** y, para cada modelo, se busca el umbral que la alcanza en las
+# predicciones **fuera de pliegue** de la validación cruzada (cada registro de entrenamiento lo
+# predice un modelo que no lo vio). La prueba no interviene en la elección: el umbral se aplica
+# después al conjunto de prueba para medir el costo en especificidad y precisión. El AUC no cambia,
+# porque no depende del umbral.
+
+# %%
+SENS_OBJETIVO = 0.90
+umbral = {}
+for nombre, b in busquedas.items():
+    t0 = time.time()
+    metodo = "predict_proba" if hasattr(b.best_estimator_, "predict_proba") else "decision_function"
+    s_oof = cross_val_predict(clone(b.best_estimator_), X_train, y_train, cv=cv, n_jobs=N_JOBS,
+                              method=metodo)
+    if s_oof.ndim == 2:
+        s_oof = s_oof[:, 1]
+    pos_oof = s_oof[y_train.to_numpy() == 1]
+    u = float(np.quantile(pos_oof, 1 - SENS_OBJETIVO, method="lower"))
+    s = puntaje(ajustados[nombre], X_test)
+    umbral[nombre] = {"umbral": u,
+                      "sens_validacion": float((pos_oof >= u).mean()),
+                      "esp_validacion": float((s_oof[y_train.to_numpy() == 0] < u).mean()),
+                      "prueba": metricas_prueba(y_test, s, (s >= u).astype(int))}
+    p = umbral[nombre]["prueba"]
+    print(f"{nombre:<20} umbral {u:.3f}  sens {p['sensibilidad']['valor']:.3f}  "
+          f"esp {p['especificidad']['valor']:.3f}  prec {p['precision']['valor']:.3f}  "
+          f"({time.time() - t0:.0f} s)", flush=True)
+resultados["umbral"] = {"sensibilidad_objetivo": SENS_OBJETIVO, "modelos": umbral}
 
 # %% [markdown]
 # ### 4.5 Tratamiento del desbalance: submuestreo, pesos por clase y SMOTE-NC
@@ -678,6 +712,16 @@ C_lr = float(evaluacion["Regresión logística"]["mejores_parametros"]["C"])
 combinaciones = dict(BLOQUES)
 combinaciones["Social + demográfico"] = BLOQUES["Socioeconómico y acceso"] + BLOQUES["Demográfico"]
 combinaciones["Todas"] = VARIABLES
+# Variante: el control de colesterol en los últimos cinco años refleja acceso a la salud más que un
+# hallazgo clínico, así que también se evalúa dentro del bloque socioeconómico y de acceso.
+ALTERNATIVA_CHOLCHECK = {
+    "Socioeconómico y acceso (con control de colesterol)":
+        BLOQUES["Socioeconómico y acceso"] + ["CholCheck"],
+    "Clínico (sin control de colesterol)": [v for v in BLOQUES["Clínico"] if v != "CholCheck"],
+    "Social + demográfico (con control de colesterol)":
+        BLOQUES["Socioeconómico y acceso"] + ["CholCheck"] + BLOQUES["Demográfico"],
+}
+combinaciones.update(ALTERNATIVA_CHOLCHECK)
 cfg_rf = {k: (None if v == "None" else int(v))
           for k, v in evaluacion["Random Forest"]["mejores_parametros"].items()}
 bloques = {}
@@ -688,7 +732,8 @@ for etiqueta, cols in combinaciones.items():
     bloques[etiqueta] = {"n_variables": len(cols),
                          "auc_lr": float(roc_auc_score(y_test, lr.predict_proba(X_test[cols])[:, 1])),
                          "auc_rf": float(roc_auc_score(y_test, rf.predict_proba(X_test[cols])[:, 1]))}
-resultados["bloques"] = bloques
+resultados["bloques"] = {k: v for k, v in bloques.items() if k not in ALTERNATIVA_CHOLCHECK}
+resultados["bloques_cholcheck"] = {k: bloques[k] for k in ALTERNATIVA_CHOLCHECK}
 pd.DataFrame(bloques).T
 
 # %% [markdown]
@@ -747,9 +792,13 @@ individual = pd.DataFrame({
     "informacion_mutua": im_,
     "auc_individual": [max(a, 1 - a) for a in (roc_auc_score(y_train, X_train[v]) for v in VARIABLES)],
 }, index=VARIABLES).sort_values("auc_individual", ascending=False)
-# Candidatas a eliminar: discriminan casi como el azar (AUC individual < 0,55) y comparten muy poca
-# información con la clase (|ρ| < 0,10).
-candidatas = individual[(individual.auc_individual < 0.55) & (individual.spearman.abs() < 0.10)].index.tolist()
+# Candidatas a eliminar: su asociación con la clase no llega a un efecto pequeño con ninguna de las
+# dos medidas. |ρ| < 0,10 es una correlación despreciable (Schober et al., 2018) y equivale al
+# efecto pequeño de Cohen (r = 0,1); AUC < 0,556 es el efecto pequeño de Cohen (d = 0,2) expresado
+# como área bajo la curva (Rice y Harris, 2005).
+UMBRAL_AUC_SEL, UMBRAL_RHO_SEL = 0.556, 0.10
+candidatas = individual[(individual.auc_individual < UMBRAL_AUC_SEL)
+                        & (individual.spearman.abs() < UMBRAL_RHO_SEL)].index.tolist()
 conservadas = [v for v in VARIABLES if v not in candidatas]
 reduccion["individual"] = individual.to_dict(orient="index")
 reduccion["candidatas_eliminar"] = candidatas
@@ -763,7 +812,7 @@ fig, ax = plt.subplots(figsize=(UNA_COL, 2.9))
 ind = individual.iloc[::-1]
 colores = [GRIS if v in candidatas else AZUL for v in ind.index]
 ax.barh([NOMBRES[v] for v in ind.index], ind.auc_individual - 0.5, left=0.5, color=colores)
-ax.axvline(0.55, color=ROJO, ls="--", lw=0.7)
+ax.axvline(UMBRAL_AUC_SEL, color=ROJO, ls="--", lw=0.7)
 ax.set_xlim(0.5, max(0.75, ind.auc_individual.max() + 0.02))
 ax.set_xlabel("AUC-ROC de la variable sola (índice de discriminación)")
 from matplotlib.patches import Patch  # noqa: E402
