@@ -827,11 +827,15 @@ plt.show()
 # %% [markdown]
 # ### 5.2 Extracción lineal: PCA
 #
-# **Criterio.** Se comparan dos criterios estándar sobre las variables estandarizadas: el de Kaiser
+# **Criterio.** Se comparan cuatro criterios sobre las variables estandarizadas: el de Kaiser
 # (componentes con autovalor mayor que 1, es decir, que explican más varianza que una variable
-# original) y el del 90 % de varianza explicada. Se elige el de Kaiser: con un tercio de las
-# dimensiones pierde alrededor de una centésima de AUC, mientras que el del 90 % casi no reduce la
-# dimensión (las variables están poco correlacionadas) y en Random Forest no mejora el resultado.
+# original), el del 90 % de varianza explicada, el codo del gráfico de sedimentación (punto más
+# alejado de la recta entre el primer y el último autovalor) y un *wrapper* (el menor k cuyo AUC de
+# validación cruzada con el mejor modelo queda a menos de 0,005 del máximo). Se elige el de Kaiser:
+# con un tercio de las dimensiones pierde alrededor de una centésima de AUC; el del 90 % casi no
+# reduce la dimensión (las variables están poco correlacionadas) y en Random Forest no mejora el
+# resultado; el codo se queda con muy pocas componentes y pierde más, y el *wrapper* cae en la misma
+# meseta que Kaiser.
 
 # %%
 Z = StandardScaler().fit_transform(X_train)
@@ -849,8 +853,30 @@ reduccion["pca"] = {
     "kaiser": evaluar_representacion(PCA(n_components=k_kaiser, random_state=SEMILLA)),
     "var90": evaluar_representacion(PCA(n_components=k_90, random_state=SEMILLA)),
 }
-print(f"Kaiser: {k_kaiser} componentes ({var_acum[k_kaiser - 1]:.1%}); 90 %: {k_90} componentes")
-for crit in ("kaiser", "var90"):
+
+# Codo: punto del gráfico de sedimentación más alejado de la recta entre el primer y el último autovalor.
+num_pc = np.arange(1, 22)
+recta = np.array([20, autovalores[-1] - autovalores[0]])
+dist_codo = np.abs(recta[0] * (autovalores - autovalores[0]) - recta[1] * (num_pc - 1))
+k_codo = int(num_pc[np.argmax(dist_codo)])
+# Wrapper: AUC de validación cruzada del mejor modelo para cada k; el menor k a menos de 0,005 del máximo.
+base = clone(busquedas[MEJORES[0]].best_estimator_)
+m_wrapper = base.steps[-1][1] if isinstance(base, Pipeline) else base
+wrapper_cv = {}
+for k in range(1, 21):
+    pipe = Pipeline([("escala", StandardScaler()), ("reduccion", PCA(n_components=k, random_state=SEMILLA)),
+                     ("modelo", clone(m_wrapper))])
+    r = cross_validate(pipe, X_train, y_train, cv=cv, scoring={"auc_roc": "roc_auc"}, n_jobs=N_JOBS)
+    wrapper_cv[k] = float(r["test_auc_roc"].mean())
+k_wrapper = min(k for k in wrapper_cv if wrapper_cv[k] >= max(wrapper_cv.values()) - 0.005)
+reduccion["pca"].update({
+    "k_codo": k_codo, "codo": evaluar_representacion(PCA(n_components=k_codo, random_state=SEMILLA)),
+    "wrapper_cv": wrapper_cv, "k_wrapper": k_wrapper,
+    "wrapper": evaluar_representacion(PCA(n_components=k_wrapper, random_state=SEMILLA)),
+})
+print(f"Kaiser: {k_kaiser} componentes ({var_acum[k_kaiser - 1]:.1%}); 90 %: {k_90} componentes; "
+      f"codo: {k_codo}; wrapper: {k_wrapper}")
+for crit in ("kaiser", "var90", "codo", "wrapper"):
     for n in MEJORES:
         print(crit, n, reduccion["pca"][crit][n]["validacion_auc"])
 
@@ -858,9 +884,10 @@ for crit in ("kaiser", "var90"):
 # ### 5.3 Extracción no lineal: UMAP
 #
 # **Criterio.** UMAP no tiene una medida de varianza explicada, así que el número de componentes se
-# elige por desempeño: se prueban k ∈ {2, 3, 5, 8, 10} sobre una partición de validación (80/20) de
-# la muestra de entrenamiento con el mejor modelo, y se escoge el menor k cuyo AUC esté a menos de
-# 0,005 del máximo. Hiperparámetros de UMAP: 30 vecinos, distancia mínima 0.
+# elige por desempeño: se prueban k ∈ {2, 3, 5, 8, 10, 15} y distancia mínima ∈ {0; 0,5} sobre una
+# partición de validación (80/20) de la muestra de entrenamiento con el mejor modelo, y se escoge el
+# menor k cuyo AUC esté a menos de 0,005 del máximo (con la distancia mínima que dé el mayor AUC).
+# Se usan 30 vecinos.
 
 # %%
 import umap  # noqa: E402
@@ -868,24 +895,29 @@ import umap  # noqa: E402
 X_a, X_v, y_a, y_v = train_test_split(X_train, y_train, test_size=0.2, stratify=y_train,
                                       random_state=SEMILLA)
 esc_a = StandardScaler().fit(X_a)
-K_UMAP = [2, 3, 5, 8, 10]
-umap_val = {}
+K_UMAP = [2, 3, 5, 8, 10, 15]
+DIST_UMAP = [0.0, 0.5]
+umap_val_dist = {d: {} for d in DIST_UMAP}
 mejor_modelo = MEJORES[0]
-for k in K_UMAP:
-    t0 = time.time()
-    u = umap.UMAP(n_components=k, n_neighbors=30, min_dist=0.0, random_state=SEMILLA)
-    Ea = u.fit_transform(esc_a.transform(X_a))
-    Ev = u.transform(esc_a.transform(X_v))
-    base = clone(busquedas[mejor_modelo].best_estimator_)
-    m = base.steps[-1][1] if isinstance(base, Pipeline) else base
-    m = Pipeline([("escala", StandardScaler()), ("modelo", m)]).fit(Ea, y_a)
-    umap_val[k] = float(roc_auc_score(y_v, puntaje(m, Ev)))
-    print(f"UMAP k={k}: AUC validación {umap_val[k]:.4f} ({time.time() - t0:.0f} s)", flush=True)
+for d in DIST_UMAP:
+    for k in K_UMAP:
+        t0 = time.time()
+        u = umap.UMAP(n_components=k, n_neighbors=30, min_dist=d, random_state=SEMILLA)
+        Ea = u.fit_transform(esc_a.transform(X_a))
+        Ev = u.transform(esc_a.transform(X_v))
+        base = clone(busquedas[mejor_modelo].best_estimator_)
+        m = base.steps[-1][1] if isinstance(base, Pipeline) else base
+        m = Pipeline([("escala", StandardScaler()), ("modelo", m)]).fit(Ea, y_a)
+        umap_val_dist[d][k] = float(roc_auc_score(y_v, puntaje(m, Ev)))
+        print(f"UMAP d={d} k={k}: AUC validación {umap_val_dist[d][k]:.4f} ({time.time() - t0:.0f} s)",
+              flush=True)
+dist_umap = max(DIST_UMAP, key=lambda d: max(umap_val_dist[d].values()))
+umap_val = umap_val_dist[dist_umap]
 k_umap = min(k for k in K_UMAP if umap_val[k] >= max(umap_val.values()) - 0.005)
 
 # Evaluación final: UMAP ajustado con toda la muestra de entrenamiento y los dos mejores modelos.
 esc = StandardScaler().fit(X_train)
-u = umap.UMAP(n_components=k_umap, n_neighbors=30, min_dist=0.0, random_state=SEMILLA)
+u = umap.UMAP(n_components=k_umap, n_neighbors=30, min_dist=dist_umap, random_state=SEMILLA)
 E_tr = u.fit_transform(esc.transform(X_train))
 E_te = u.transform(esc.transform(X_test))
 umap_final = {}
@@ -896,12 +928,13 @@ for nombre in MEJORES:
     s = puntaje(pipe, E_te)
     umap_final[nombre] = {"validacion_auc_k": umap_val[k_umap],
                           "prueba": metricas_prueba(y_test, s, pipe.predict(E_te), n_boot=300)}
-reduccion["umap"] = {"k_evaluados": K_UMAP, "auc_validacion_por_k": umap_val, "k_elegido": k_umap,
-                     "resultados": umap_final}
-print("k elegido:", k_umap)
+reduccion["umap"] = {"k_evaluados": K_UMAP, "auc_validacion_por_k": umap_val,
+                     "auc_validacion_por_distancia": {str(d): v for d, v in umap_val_dist.items()},
+                     "distancia_minima": dist_umap, "k_elegido": k_umap, "resultados": umap_final}
+print("distancia mínima elegida:", dist_umap, "k elegido:", k_umap)
 
 # %%
-u2 = umap.UMAP(n_components=2, n_neighbors=30, min_dist=0.1, random_state=SEMILLA)
+u2 = umap.UMAP(n_components=2, n_neighbors=30, min_dist=dist_umap, random_state=SEMILLA)
 emb2 = u2.fit_transform(esc.transform(X_train))
 fig, ejes = plt.subplots(1, 3, figsize=(DOS_COL, 2.2))
 ax = ejes[0]
@@ -917,7 +950,9 @@ ax.set_ylabel("% de varianza explicada")
 ax.set_title("(a) PCA")
 ax.legend(frameon=False, loc="center right")
 ax = ejes[1]
-ax.plot(K_UMAP, [umap_val[k] for k in K_UMAP], "o-", color=AZUL, ms=3, lw=1)
+for d, color in zip(DIST_UMAP, [GRIS, AZUL]):
+    ax.plot(K_UMAP, [umap_val_dist[d][k] for k in K_UMAP], "o-", color=color, ms=3, lw=1,
+            label=f"Dist. mínima {str(d).replace('.', ',')}")
 ax.axvline(k_umap, color=ROJO, ls=":", lw=0.9)
 ax.axhline(reduccion["referencia_21"][mejor_modelo]["validacion_auc"][0], color="grey", ls="--", lw=0.7,
            label="21 variables originales")
@@ -926,7 +961,7 @@ ax.set_xlabel("Componentes UMAP (k)")
 ax.set_ylabel(f"AUC-ROC validación ({mejor_modelo})")
 ax.set_title("(b) Selección de k en UMAP")
 coma(ax, "y", dec=2)
-ax.legend(frameon=False, loc="center right")
+ax.legend(frameon=False, loc="lower right", fontsize=5)
 ax = ejes[2]
 muestra = rng.choice(len(emb2), 6000, replace=False)
 for clase, color, etiqueta in [(0, GRIS, "Sin diabetes"), (1, ROJO, "Prediabetes/diabetes")]:
