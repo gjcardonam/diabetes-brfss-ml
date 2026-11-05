@@ -113,6 +113,8 @@ macros.update({
     "pcaRedKaiser": pct(1 - Rd["pca"]["k_kaiser"] / 21, 0), "pcaRedNoventa": pct(1 - Rd["pca"]["k_90"] / 21, 0),
     "pcaPcUno": pct(Rd["pca"]["varianza_acumulada"][0]),
     "umapK": str(Rd["umap"]["k_elegido"]), "umapRed": pct(1 - Rd["umap"]["k_elegido"] / 21, 0),
+    "pcaCodo": str(Rd["pca"]["k_codo"]), "pcaWrapper": str(Rd["pca"]["k_wrapper"]),
+    "umapDist": num(Rd["umap"]["distancia_minima"], 1),
     "nCandidatas": str(len(Rd["candidatas_eliminar"])),
     "nConservadas": str(Rd["seleccion"]["n_variables"]),
     "selRed": pct(1 - Rd["seleccion"]["n_variables"] / 21, 0),
@@ -127,6 +129,10 @@ for clave, nombre in [("RF", "Random Forest"), ("MLP", "MLP")]:
     caida = (Rd["referencia_21"][nombre]["prueba"]["auc_roc"]["valor"]
              - Rd["umap"]["resultados"][nombre]["prueba"]["auc_roc"]["valor"])
     macros[f"umapCaida{clave}"] = num(caida)
+# AUC de prueba de los criterios de PCA que no van en la tabla (codo y wrapper).
+for crit in ("codo", "wrapper"):
+    for clave, nombre in [("RF", "Random Forest"), ("MLP", "MLP")]:
+        macros[f"pcaAuc{crit.capitalize()}{clave}"] = num(Rd["pca"][crit][nombre]["prueba"]["auc_roc"]["valor"])
 # Estabilidad del submuestreo: media, desviación y rango en varias semillas.
 SM = R["semillas"]
 macros["nSemillas"] = str(len(SM["semillas"]))
@@ -140,6 +146,30 @@ for clave, nombre in [("LR", "Regresión logística"), ("RF", "Random Forest")]:
     macros[f"semDeAp{clave}"] = num(d["auc_pr"][1], 4)
     macros[f"semSens{clave}"] = num(d["sensibilidad"][0], 4)
     macros[f"semDeSens{clave}"] = num(d["sensibilidad"][1], 4)
+
+# Umbral de decisión elegido para una sensibilidad objetivo en las predicciones fuera de pliegue.
+U = R["umbral"]
+macros["sensObjetivo"] = pct(U["sensibilidad_objetivo"], 0)
+for clave, nombre in [("LR", "Regresión logística"), ("KNN", "KNN"), ("RF", "Random Forest"),
+                      ("MLP", "MLP"), ("SVM", "SVM")]:
+    u = U["modelos"][nombre]
+    macros[f"umbral{clave}"] = num(u["umbral"])
+    for met, etq in [("sensibilidad", "Sens"), ("especificidad", "Esp"), ("precision", "Prec"),
+                     ("exactitud_balanceada", "Ba")]:
+        macros[f"umb{etq}{clave}"] = num(u["prueba"][met]["valor"])
+umb_sens = [u["prueba"]["sensibilidad"]["valor"] for u in U["modelos"].values()]
+umb_esp = [u["prueba"]["especificidad"]["valor"] for u in U["modelos"].values()]
+umb_prec = [u["prueba"]["precision"]["valor"] for u in U["modelos"].values()]
+macros.update({"umbSensMin": num(min(umb_sens)), "umbSensMax": num(max(umb_sens)),
+               "umbEspMin": num(min(umb_esp)), "umbEspMax": num(max(umb_esp)),
+               "umbPrecMin": num(min(umb_prec)), "umbPrecMax": num(max(umb_prec))})
+# Bloques con el control de colesterol en el bloque socioeconómico y de acceso.
+BC = R["bloques_cholcheck"]
+for clave, nombre in [("Social", "Socioeconómico y acceso (con control de colesterol)"),
+                      ("Clinico", "Clínico (sin control de colesterol)"),
+                      ("SocialDemo", "Social + demográfico (con control de colesterol)")]:
+    macros[f"bloqueCholRf{clave}"] = num(BC[nombre]["auc_rf"])
+    macros[f"bloqueCholLr{clave}"] = num(BC[nombre]["auc_lr"])
 
 with open(SAL / "valores.tex", "w", encoding="utf-8") as f:
     f.write("% Generado por generar_tex.py a partir de resultados/resultados.json. No editar a mano.\n")
@@ -166,7 +196,7 @@ ETQ_PARAM = {"C": "$C$", "n_neighbors": "$k$", "weights": "pesos", "max_depth": 
              "min_samples_leaf": "mín. muestras por hoja", "hidden_layer_sizes": "capas ocultas",
              "alpha": "$\\alpha$", "gamma": "$\\gamma$"}
 ETQ_VAL = {"uniform": "uniformes", "distance": "distancia", "None": "sin límite", "scale": "escala",
-           "(32,)": "(32)", "(64, 32)": "(64, 32)", "0.0001": "$10^{-4}$", "0.01": "0,01", "0.001": "0,001",
+           "(8,)": "(8)", "(16,)": "(16)", "(32,)": "(32)", "(64, 32)": "(64, 32)", "0.0001": "$10^{-4}$", "0.01": "0,01", "0.001": "0,001",
            "0.1": "0,1", "1": "1", "10": "10"}
 fijos = {"Regresión logística": "", "KNN": "", "Random Forest": "300 árboles; ",
          "MLP": "ReLU, Adam, parada temprana; ", "SVM": "kernel RBF; "}
@@ -214,7 +244,24 @@ filas[-1] = filas[-1].replace(" \\midrule", "")
 filas = []
 for nombre, b in B.items():
     filas.append(f"{nombre} & {b['n_variables']} & {num(b['auc_lr'])} & {num(b['auc_rf'])} \\\\")
+filas[-1] += " \\midrule"
+filas.append("\\multicolumn{4}{l}{\\textit{Control de colesterol en el bloque socioeconómico}} \\\\")
+for nombre, b in BC.items():
+    etq = {"Socioeconómico y acceso (con control de colesterol)": "Socioeconómico y acceso",
+           "Clínico (sin control de colesterol)": "Clínico",
+           "Social + demográfico (con control de colesterol)": "Social + demográfico"}[nombre]
+    filas.append(f"{etq} & {b['n_variables']} & {num(b['auc_lr'])} & {num(b['auc_rf'])} \\\\")
 (SAL / "tabla_bloques.tex").write_text("\n".join(filas) + "\n", encoding="utf-8")
+
+# ---------------------------------------------------------------- Tabla de umbral
+filas = []
+for nombre, u in U["modelos"].items():
+    p, b = u["prueba"], M[nombre]["prueba"]
+    filas.append(f"{nombre} & {num(u['umbral']).replace('-', '$-$')} & {num(b['sensibilidad']['valor'])} $\\to$ "
+                 f"{num(p['sensibilidad']['valor'])} & {num(b['especificidad']['valor'])} $\\to$ "
+                 f"{num(p['especificidad']['valor'])} & {num(b['precision']['valor'])} $\\to$ "
+                 f"{num(p['precision']['valor'])} \\\\")
+(SAL / "tabla_umbral.tex").write_text("\n".join(filas) + "\n", encoding="utf-8")
 
 # ---------------------------------------------------------------- Tabla de reducción
 repr_ = [("Variables originales", Rd["referencia_21"], 21, "cv"),
@@ -241,4 +288,4 @@ for etiqueta, res, k, tipo in repr_:
     filas[-1] += " \\midrule"
 filas[-1] = filas[-1].replace(" \\midrule", "")
 (SAL / "tabla_reduccion.tex").write_text("\n".join(filas) + "\n", encoding="utf-8")
-print(f"{len(macros)} valores y 6 tablas en {SAL}")
+print(f"{len(macros)} valores y 7 tablas en {SAL}")
